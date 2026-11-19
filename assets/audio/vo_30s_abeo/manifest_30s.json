@@ -1,0 +1,79 @@
+[
+  {
+    "id": "scene1_hook",
+    "name": "Hard Hook",
+    "text": "Wait! Before you buy another laptop, look at this ThinkPad!",
+    "clip": "IMG_0100.MOV",
+    "start": 0.5,
+    "zoom": true,
+    "text_overlay": "YOU STILL USING A SLOW LAPTOP? \ud83d\udc40",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene1_hook.mp3",
+    "duration": 4.728
+  },
+  {
+    "id": "scene2_build",
+    "name": "The Build",
+    "text": "This is the Lenovo ThinkPad T490s \u2014 clean, professional, and built for people who actually need to get WORK done.",
+    "clip": "IMG_0099.MOV",
+    "start": 0.2,
+    "zoom": false,
+    "text_overlay": "THINKPAD T490s\nBUILT FOR WORK \ud83d\udcbc",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene2_build.mp3",
+    "duration": 6.84
+  },
+  {
+    "id": "scene3_specs",
+    "name": "Spec Attack",
+    "text": "You get a Core i7 processor, 4 cores, 8 logical processors, 16 gigs RAM, and a fast 256GB SSD.",
+    "clip": "IMG_0097.MOV",
+    "start": 0.0,
+    "zoom": false,
+    "text_overlay": "CORE i7 \u2022 4 CORES\n16GB RAM \u2022 256GB SSD",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene3_specs.mp3",
+    "duration": 8.4
+  },
+  {
+    "id": "scene4_touch",
+    "name": "Touchscreen & Work",
+    "text": "Plus an authentic 10-point touchscreen, ready for smooth multitasking, business, school, and office work.",
+    "clip": "IMG_0098.MOV",
+    "start": 0.0,
+    "zoom": true,
+    "text_overlay": "10-POINT TOUCHSCREEN \u2728\nBUSINESS \u2022 STUDY \u2022 WORK",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene4_touch.mp3",
+    "duration": 6.48
+  },
+  {
+    "id": "scene5_reliability",
+    "name": "Durability",
+    "text": "And if you know ThinkPad, you know it's a legendary, reliable work machine built to last.",
+    "clip": "IMG_0102.MOV",
+    "start": 2.0,
+    "zoom": false,
+    "text_overlay": "RELIABLE WORK MACHINE \ud83d\udee1\ufe0f",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene5_reliability.mp3",
+    "duration": 5.04
+  },
+  {
+    "id": "scene6_windows",
+    "name": "Windows 11 Beauty",
+    "text": "Running genuine Windows 11. Pure performance, not just decoration on your table.",
+    "clip": "IMG_0096.MOV",
+    "start": 1.0,
+    "zoom": false,
+    "text_overlay": "GENUINE WINDOWS 11 \u26a1\n16GB RAM \u2022 PURE PERFORMANCE",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene6_windows.mp3",
+    "duration": 5.736
+  },
+  {
+    "id": "scene7_cta",
+    "name": "CTA",
+    "text": "Ready to get yours? Use the link below, or DM Customer Service on WhatsApp now. Don't just watch it, get yours!",
+    "clip": "IMG_0096.MOV",
+    "start": 5.0,
+    "zoom": true,
+    "text_overlay": "ORDER NOW \ud83d\udd25\nUSE LINK BELOW\nDM WHATSAPP: +234 806 715 0130",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_30s_abeo\\scene7_cta.mp3",
+    "duration": 8.352
+  }
+]

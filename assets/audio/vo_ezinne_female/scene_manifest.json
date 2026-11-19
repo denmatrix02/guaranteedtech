@@ -1,0 +1,58 @@
+[
+  {
+    "id": "scene1",
+    "name": "The Hook",
+    "text": "Wait\u2014before you buy another laptop, look at this ThinkPad!",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene1.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene1.vtt",
+    "duration": 4.272
+  },
+  {
+    "id": "scene2",
+    "name": "Show the Build",
+    "text": "This is the Lenovo ThinkPad T490s \u2014 clean, professional, and built for people who actually need their laptop to WORK.",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene2.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene2.vtt",
+    "duration": 7.824
+  },
+  {
+    "id": "scene3",
+    "name": "Spec Attack",
+    "text": "You\u2019re getting an Intel Core i7 processor, 4 cores and 8 logical processors, 16GB RAM and a 256GB SSD.",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene3.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene3.vtt",
+    "duration": 9.504
+  },
+  {
+    "id": "scene4",
+    "name": "Touchscreen & Everyday Work",
+    "text": "That means smooth everyday multitasking for business, school, browsing, office work, content work and more.",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene4.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene4.vtt",
+    "duration": 7.2
+  },
+  {
+    "id": "scene5",
+    "name": "Reliability & Reputation",
+    "text": "And if you know ThinkPad, you already know the name is associated with a serious work machine \u2014 practical, professional and made for getting things done.",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene5.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene5.vtt",
+    "duration": 8.664
+  },
+  {
+    "id": "scene6",
+    "name": "Windows 11 & Value Recap",
+    "text": "Windows 11, 16 gigs of RAM, SSD storage \u2014 this is the kind of laptop you buy because you want to get work done, not because you want decoration on your table.",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene6.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene6.vtt",
+    "duration": 9.96
+  },
+  {
+    "id": "scene7",
+    "name": "CTA / Direct Response",
+    "text": "Want yours? Use the link below to place your order, or DM Customer Service on WhatsApp: plus two-three-four, eight-zero-six, seven-one-five, zero-one-three-zero. Don\u2019t just watch it. Get yours.",
+    "audio_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene7.mp3",
+    "vtt_file": "C:\\Users\\DENNIS\\Documents\\Guaranteed Tech\\assets\\audio\\vo_ezinne_female\\scene7.vtt",
+    "duration": 14.664
+  }
+]
