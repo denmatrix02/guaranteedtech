@@ -80,7 +80,7 @@ export async function PUT(request: Request) {
           channel: "WHATSAPP", // Explicitly flagged as manual WhatsApp intake!
           status: "PROCESSING",
           paymentStatus: "PAID",
-          paymentMethod: paymentMethod || "BANK_TRANSFER",
+          paymentMethod: paymentMethod || "CASH_ON_DELIVERY",
           subtotal,
           deliveryFee,
           totalAmount,

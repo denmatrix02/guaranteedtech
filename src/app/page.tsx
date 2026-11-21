@@ -189,13 +189,15 @@ export default async function HomePage() {
       <section className="bg-white border-b border-slate-100 overflow-hidden relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] flex items-center">
         {/* Right Keyboard Visual (FILLED WITH NO EDGES - Completely Flush) */}
         <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[62%] h-full z-0 overflow-hidden pointer-events-none select-none">
-          {/* Smooth left-edge gradient fade to pure white */}
-          <div className="absolute inset-y-0 left-0 w-32 sm:w-48 bg-gradient-to-r from-white via-white/80 to-transparent z-10"></div>
+          {/* Mobile Overlay: High-contrast white gradient ensuring razor-sharp legibility on small screens */}
+          <div className="lg:hidden absolute inset-0 bg-gradient-to-r from-white via-white/92 to-white/35 z-10"></div>
+          {/* Desktop left-edge gradient fade to pure white */}
+          <div className="hidden lg:block absolute inset-y-0 left-0 w-48 bg-gradient-to-r from-white via-white/80 to-transparent z-10"></div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/ui/hero_keyboard_flush.jpg"
             alt="Premium Computing - Buy Now Keyboard"
-            className="w-full h-full object-cover object-right select-none"
+            className="w-full h-full object-cover object-right opacity-60 sm:opacity-80 lg:opacity-100 select-none"
           />
         </div>
 
@@ -204,23 +206,23 @@ export default async function HomePage() {
           <div className="max-w-md">
             {/* Main Headline: Exact proportional hierarchy matching reference mockup */}
             <h1 className="leading-tight">
-              <span className="font-bold text-2xl sm:text-3xl lg:text-[34px] text-[#222222] block tracking-tight">
+              <span className="font-bold text-2xl sm:text-3xl lg:text-[34px] text-[#1e1e1e] block tracking-tight">
                 Premium Computing
               </span>
-              <span className="font-light text-2xl sm:text-3xl lg:text-[34px] text-[#2D6DC5] block tracking-tight mt-0.5">
+              <span className="font-normal text-2xl sm:text-3xl lg:text-[34px] text-[#1E5FB9] block tracking-tight mt-0.5">
                 for a Smarter You
               </span>
             </h1>
 
-            {/* Subtext: Proportional, extra-light/light typography matching reference mockup */}
-            <p className="font-light text-xs sm:text-[13px] text-slate-500 mt-2.5 leading-normal max-w-xs sm:max-w-sm">
+            {/* Subtext: Proportional typography with verified high contrast */}
+            <p className="font-light text-xs sm:text-[13px] text-slate-600 mt-2.5 leading-normal max-w-xs sm:max-w-sm">
               Get your computing products &mdash; all in one place.
             </p>
 
             <div className="pt-4 sm:pt-5">
               <Link
                 href="/shop"
-                className="inline-block bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-[10px] sm:text-[11px] uppercase tracking-[0.16em] px-6 sm:px-7 py-2 sm:py-2.5 rounded-full shadow-xs transition-colors"
+                className="inline-block bg-[#FFB200] hover:bg-[#FFA500] text-white font-medium text-[10px] sm:text-[11px] uppercase tracking-[0.16em] px-6 sm:px-7 py-2 sm:py-2.5 rounded-full shadow-xs transition-colors"
               >
                 SHOP COLLECTION
               </Link>

@@ -6,8 +6,6 @@ import { formatNaira } from "@/lib/currency";
 import {
   CheckCircle2,
   Truck,
-  Building2,
-  CreditCard,
   Printer,
   MessageSquare,
   ShieldCheck,
@@ -123,35 +121,23 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
           </div>
         )}
 
-        {/* Bank Transfer Instructions (if selected) */}
-        {order.paymentMethod === "BANK_TRANSFER" && (
-          <div className="bg-amber-50/40 rounded border border-amber-200 p-6 sm:p-8 space-y-4">
-            <div className="flex items-center gap-2 text-amber-900">
-              <Building2 className="w-4 h-4 text-amber-700 stroke-[1.5]" />
-              <h3 className="font-normal text-xs uppercase tracking-wider">
-                Direct Bank Transfer Instructions
-              </h3>
-            </div>
-            <p className="text-xs font-extralight text-amber-900 leading-relaxed">
-              Please transfer exactly <strong className="font-normal text-slate-800">{formatNaira(order.totalAmount)}</strong> to our official corporate account below and share the debit receipt on WhatsApp for instant clearance:
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-white rounded border border-amber-100 text-xs">
-              <div>
-                <span className="text-slate-400 font-extralight block">Bank Name:</span>
-                <span className="font-normal text-slate-800 text-sm">Zenith Bank Plc</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-extralight block">Account Number:</span>
-                <span className="font-mono font-normal text-slate-800 text-sm">1014892019</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-extralight block">Account Name:</span>
-                <span className="font-normal text-slate-800 text-sm">GuaranteedTech Nigeria Ltd</span>
-              </div>
-            </div>
+        {/* Payment on Delivery Instructions */}
+        <div className="bg-emerald-50/60 rounded border border-emerald-200 p-6 sm:p-8 space-y-3.5">
+          <div className="flex items-center gap-2 text-emerald-900">
+            <Truck className="w-4 h-4 text-emerald-700 stroke-[1.5]" />
+            <h3 className="font-normal text-xs uppercase tracking-wider">
+              Payment on Delivery (Cash, POS or Mobile Transfer Upon Receipt)
+            </h3>
           </div>
-        )}
+          <p className="text-xs font-extralight text-emerald-950 leading-relaxed">
+            Your order has been booked with <strong className="font-normal text-emerald-900">Payment on Delivery</strong>. No upfront payment is required. You will only pay <strong className="font-normal text-slate-900">{formatNaira(order.totalAmount)}</strong> directly to the delivery courier after you inspect and verify your package.
+          </p>
+          <div className="pt-2 text-[11px] font-light text-emerald-800 flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>&bull; Verified GIG Logistics Delivery</span>
+            <span>&bull; Free Hardware Inspection Before Payment</span>
+            <span>&bull; 6-Month Official GuaranteedTech Warranty</span>
+          </div>
+        </div>
 
         {/* Order Details & Receipt */}
         <div className="bg-white rounded border border-[#EBEBEB] p-6 sm:p-8 space-y-6">
@@ -212,7 +198,7 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
             <div>
               <span className="text-slate-400 font-extralight block mb-1">Payment Method &amp; Status:</span>
               <p className="font-light text-slate-700 leading-relaxed">
-                Method: <strong>{order.paymentMethod}</strong><br />
+                Method: <strong>{order.paymentMethod === "CASH_ON_DELIVERY" ? "Payment on Delivery (COD)" : order.paymentMethod}</strong><br />
                 Status: <span className="text-[#FFB200] font-normal">{order.paymentStatus}</span><br />
                 Order Channel: {order.channel}
               </p>

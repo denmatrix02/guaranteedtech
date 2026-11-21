@@ -7,8 +7,6 @@ import { useCart } from "@/context/CartContext";
 import { formatNaira } from "@/lib/currency";
 import {
   ShieldCheck,
-  CreditCard,
-  Building2,
   Truck,
   CheckCircle2,
   Lock,
@@ -27,7 +25,7 @@ export default function CheckoutPage() {
   const [deliveryCity, setDeliveryCity] = useState("Ikeja");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("PAYSTACK");
+  const [paymentMethod, setPaymentMethod] = useState("CASH_ON_DELIVERY");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -246,57 +244,45 @@ export default function CheckoutPage() {
             <div className="bg-white rounded border border-[#EBEBEB] p-6 sm:p-8 space-y-4">
               <h2 className="text-xs font-normal uppercase tracking-[0.16em] text-slate-800 pb-3 border-b border-slate-100 flex items-center justify-between">
                 <span>3. Payment Method</span>
-                <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-light">
-                  All Transactions in ₦ Naira
+                <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded font-light border border-emerald-200">
+                  Exclusive Option: Payment on Delivery
                 </span>
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[
-                  {
-                    id: "PAYSTACK",
-                    title: "Paystack Online Payment",
-                    desc: "Pay securely with Debit Card, USSD, or Bank Transfer via Paystack",
-                    icon: <CreditCard className="w-4 h-4 text-[#FFB200] stroke-[1.5]" />,
-                  },
-                  {
-                    id: "BANK_TRANSFER",
-                    title: "Direct Corporate Bank Transfer",
-                    desc: "Transfer directly to GuaranteedTech Zenith Bank account",
-                    icon: <Building2 className="w-4 h-4 text-blue-500 stroke-[1.5]" />,
-                  },
-                  {
-                    id: "FLUTTERWAVE",
-                    title: "Flutterwave Online",
-                    desc: "Pay with Mastercard, Visa, Verve, or Barter",
-                    icon: <CreditCard className="w-4 h-4 text-purple-500 stroke-[1.5]" />,
-                  },
-                  {
-                    id: "CASH_ON_DELIVERY",
-                    title: "Pay on Delivery (GIG Logistics)",
-                    desc: "Available for verified locations in Lagos, Abuja & PH",
-                    icon: <Truck className="w-4 h-4 text-emerald-500 stroke-[1.5]" />,
-                  },
-                ].map((pm) => (
-                  <button
-                    key={pm.id}
-                    type="button"
-                    onClick={() => setPaymentMethod(pm.id)}
-                    className={`p-3.5 rounded border text-left transition-all flex items-start gap-3 ${
-                      paymentMethod === pm.id
-                        ? "border-[#FFB200] bg-amber-50/40"
-                        : "border-[#EBEBEB] hover:border-slate-300 bg-white"
-                    }`}
-                  >
-                    <div className="p-2 rounded bg-slate-50 border border-slate-100 flex-shrink-0">
-                      {pm.icon}
+              <div className="p-4 sm:p-5 rounded-lg border-2 border-emerald-500 bg-emerald-50/30 space-y-3.5">
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2.5 rounded-md bg-emerald-100/80 border border-emerald-200 text-emerald-800 flex-shrink-0">
+                    <Truck className="w-5 h-5 stroke-[1.5]" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-normal text-sm text-slate-900">
+                        Payment on Delivery (Cash, POS or Mobile Transfer Upon Receipt)
+                      </h4>
+                      <span className="text-[10px] font-light bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
                     </div>
-                    <div>
-                      <h4 className="font-normal text-xs text-slate-800">{pm.title}</h4>
-                      <p className="text-[11px] font-extralight text-slate-400 mt-0.5 leading-snug">{pm.desc}</p>
-                    </div>
-                  </button>
-                ))}
+                    <p className="text-xs font-light text-slate-600 leading-relaxed">
+                      Zero advance payment required. Inspect and verify your certified computing hardware with our delivery courier before making payment.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-emerald-100 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] font-light text-slate-600">
+                  <div className="flex items-center gap-2 bg-white/90 p-2.5 rounded border border-emerald-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 stroke-[1.5]" />
+                    <span>Inspect hardware before paying</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/90 p-2.5 rounded border border-emerald-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 stroke-[1.5]" />
+                    <span>Cash, POS Card or Mobile Transfer</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/90 p-2.5 rounded border border-emerald-100">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 stroke-[1.5]" />
+                    <span>Nationwide dispatch from Aba hubs</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -333,18 +319,26 @@ export default function CheckoutPage() {
                 </span>
               </div>
               <div className="pt-3 border-t border-slate-100 flex justify-between text-sm">
-                <span className="font-light text-slate-800">Total Payable:</span>
+                <span className="font-light text-slate-800">Total Due on Delivery:</span>
                 <span className="font-normal text-lg text-[#FFB200]">{formatNaira(grandTotal)}</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded bg-emerald-50/70 border border-emerald-200 text-emerald-950 text-xs font-light flex items-start gap-2 leading-relaxed">
+              <ShieldCheck className="w-4 h-4 text-emerald-700 flex-shrink-0 mt-0.5 stroke-[1.5]" />
+              <div>
+                <strong className="font-normal block text-emerald-900">Payment on Delivery</strong>
+                Pay only when your package is delivered and inspected.
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-wider rounded transition-colors shadow-xs flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-wider rounded transition-colors shadow-xs flex items-center justify-center gap-2"
             >
               <Lock className="w-3.5 h-3.5" />
-              {isSubmitting ? "Placing Order..." : `Confirm & Place Order (${formatNaira(grandTotal)})`}
+              {isSubmitting ? "Placing Order..." : `Confirm Order (Pay on Delivery)`}
             </button>
 
             <div className="text-[10px] font-extralight text-slate-400 text-center leading-relaxed">
