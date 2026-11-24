@@ -112,6 +112,7 @@ export function Navbar() {
                   <Link
                     key={link.name}
                     href={link.href}
+                    prefetch={true}
                     className={`transition-colors py-1 ${
                       isActive
                         ? "text-[#FFB200] font-normal"
@@ -131,7 +132,7 @@ export function Navbar() {
                 type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 aria-label="Search Catalog"
-                className="hover:text-amber-600 transition-colors"
+                className="hover:text-amber-600 transition-colors cursor-pointer"
               >
                 <Search className="w-4 h-4 stroke-[1.4]" />
               </button>
@@ -139,6 +140,7 @@ export function Navbar() {
               {/* Account Icon */}
               <Link
                 href="/account"
+                prefetch={true}
                 aria-label="Account"
                 className="hover:text-amber-600 transition-colors"
               >
@@ -148,6 +150,7 @@ export function Navbar() {
               {/* Wishlist Heart Icon */}
               <Link
                 href="/wishlist"
+                prefetch={true}
                 aria-label="Wishlist"
                 className="hover:text-amber-600 transition-colors relative"
               >
@@ -159,7 +162,7 @@ export function Navbar() {
                 type="button"
                 onClick={() => setIsCartOpen(true)}
                 aria-label="Cart"
-                className="hover:text-amber-600 transition-colors relative"
+                className="hover:text-amber-600 transition-colors relative cursor-pointer"
               >
                 <ShoppingCart className="w-4 h-4 stroke-[1.4]" />
                 {totalItems > 0 && (
@@ -212,6 +215,7 @@ export function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
+                  prefetch={true}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="px-3 py-2 rounded text-xs font-light tracking-[0.16em] text-slate-700 hover:bg-slate-50 hover:text-amber-600"
                 >
@@ -221,6 +225,7 @@ export function Navbar() {
               <div className="pt-2 border-t border-slate-100">
                 <Link
                   href="/admin"
+                  prefetch={true}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="px-3 py-2 rounded text-xs font-light text-amber-700 bg-amber-50 block text-center tracking-wider"
                 >

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { normalizeCategorySlug } from "@/lib/categories";
 
 export interface SearchFilters {
   category?: string;
@@ -326,9 +327,12 @@ export async function getFilteredProducts(filters: SearchFilters) {
   const whereClause: any = { isPublished: true };
 
   if (filters.category) {
+    const canonical = normalizeCategorySlug(filters.category);
     whereClause.category = {
       OR: [
+        { slug: canonical },
         { slug: filters.category },
+        { parent: { slug: canonical } },
         { parent: { slug: filters.category } },
       ],
     };
@@ -360,10 +364,8 @@ export async function getFilteredProducts(filters: SearchFilters) {
     include: {
       brand: true,
       category: true,
-      images: { orderBy: { displayOrder: "asc" } },
-      variants: true,
-      specifications: true,
-      reviews: true,
+      images: { orderBy: { displayOrder: "asc" }, take: 4 },
+      variants: { select: { id: true, name: true, priceAdjustment: true } },
     },
     take: 36,
   });

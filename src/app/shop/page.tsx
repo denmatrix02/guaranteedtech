@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { getFilteredProducts } from "@/lib/search";
+import { normalizeCategorySlug, getCategoryMetadata } from "@/lib/categories";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { formatNaira } from "@/lib/currency";
 import { Filter, X, SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -46,10 +47,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const maxPrice = params.maxPrice ? parseFloat(params.maxPrice) : undefined;
   const sort = (params.sort as any) || "featured";
 
+  const canonicalCategory = normalizeCategorySlug(params.category);
+  const categoryMeta = canonicalCategory ? getCategoryMetadata(canonicalCategory) : null;
+  const pageTitle = categoryMeta ? categoryMeta.name : "Computing Catalog";
+
   // Execute database query using our filtered products helper
   const [products, allCategories, allBrands] = await Promise.all([
     getFilteredProducts({
-      category: params.category,
+      category: canonicalCategory || params.category,
       brand: brandList,
       condition: conditionList as any,
       minPrice,
@@ -78,14 +83,22 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         {/* Breadcrumb & Title */}
         <div className="mb-6">
           <nav className="flex items-center gap-2 text-xs font-light text-slate-400 mb-2">
-            <Link href="/" className="hover:text-slate-800 transition-colors">Home</Link>
+            <Link href="/" prefetch={true} className="hover:text-slate-800 transition-colors">Home</Link>
             <span>/</span>
-            <span className="text-slate-800 font-normal">Shop All Products</span>
+            {categoryMeta ? (
+              <>
+                <Link href="/shop" prefetch={true} className="hover:text-slate-800 transition-colors">Shop</Link>
+                <span>/</span>
+                <span className="text-slate-800 font-normal">{categoryMeta.name}</span>
+              </>
+            ) : (
+              <span className="text-slate-800 font-normal">Shop All Products</span>
+            )}
           </nav>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-light text-slate-800 tracking-wide uppercase">
-                Computing Catalog
+                {pageTitle}
               </h1>
               <p className="text-xs font-extralight text-slate-400 mt-1">
                 Showing {products.length} {products.length === 1 ? "system" : "systems"} available in stock
@@ -121,7 +134,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 </select>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 bg-[#FFB200] hover:bg-[#FFA500] text-white rounded text-xs font-light uppercase tracking-wider transition-colors"
+                  className="px-3 py-1.5 bg-[#FFB200] hover:bg-[#FFA500] text-white rounded text-xs font-light uppercase tracking-wider transition-colors shadow-xs"
                 >
                   Apply
                 </button>
@@ -136,7 +149,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <span className="text-xs font-light text-slate-700">Active Filters:</span>
             {params.category && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-50 text-amber-900 text-xs font-light border border-amber-200">
-                Category: {params.category}
+                Category: {categoryMeta?.name || params.category}
               </span>
             )}
             {brandList?.map((b) => (
@@ -196,20 +209,24 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                     All Categories
                   </Link>
                 </li>
-                {allCategories.map((c: any) => (
-                  <li key={c.id}>
-                    <Link
-                      href={`/shop?category=${c.slug}`}
-                      className={`block px-2.5 py-1.5 rounded font-light transition-colors ${
-                        params.category === c.slug
-                          ? "bg-[#FFB200] text-white"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                      }`}
-                    >
-                      {c.name}
-                    </Link>
-                  </li>
-                ))}
+                {allCategories.map((c: any) => {
+                  const isSelected = params.category === c.slug || canonicalCategory === c.slug;
+                  return (
+                    <li key={c.id}>
+                      <Link
+                        href={`/shop?category=${c.slug}`}
+                        prefetch={true}
+                        className={`block px-2.5 py-1.5 rounded font-light transition-colors ${
+                          isSelected
+                            ? "bg-[#FFB200] text-white"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        }`}
+                      >
+                        {c.name}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 

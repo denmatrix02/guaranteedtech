@@ -2,13 +2,13 @@ import React from "react";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { formatNaira } from "@/lib/currency";
+import { CarouselContainer } from "@/components/ui/CarouselContainer";
+import { ReviewsCarousel } from "@/components/ui/ReviewsCarousel";
 import {
   ShoppingCart,
   Award,
   Tag,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Star,
   ArrowRight,
 } from "lucide-react";
@@ -30,14 +30,14 @@ export default async function HomePage() {
     }),
   ]);
 
-  // 1. Categories exact 1:1 match from reference UI (01 Home.jpg)
+  // 1. Categories exact 1:1 match from reference UI (01 Home.jpg) with verified dedicated routes
   const uiCategories = [
-    { name: "Printers", image: "/images/ui/category_1.jpg", href: "/shop?category=printers" },
-    { name: "Projectors", image: "/images/ui/category_2.jpg", href: "/shop" },
-    { name: "Equipment", image: "/images/ui/category_3.jpg", href: "/shop?category=networking-equipment" },
-    { name: "Desktops", image: "/images/ui/category_4.jpg", href: "/shop?category=desktop-computers" },
-    { name: "Inks & Toner", image: "/images/ui/category_5.jpg", href: "/shop?category=printing-supplies" },
-    { name: "Laptops", image: "/images/ui/category_6.jpg", href: "/shop?category=laptops" },
+    { name: "Printers", image: "/images/ui/category_1.jpg", href: "/products/category/printers" },
+    { name: "Projectors", image: "/images/ui/category_2.jpg", href: "/products/category/projectors" },
+    { name: "Equipment", image: "/images/ui/category_3.jpg", href: "/products/category/equipment" },
+    { name: "Desktops", image: "/images/ui/category_4.jpg", href: "/products/category/desktops" },
+    { name: "Inks & Toner", image: "/images/ui/category_5.jpg", href: "/products/category/inks-toner" },
+    { name: "Laptops", image: "/images/ui/category_6.jpg", href: "/products/category/laptops" },
   ];
 
   // 2. Best selling items exact 1:1 match from reference UI (Row of 5 cards)
@@ -153,6 +153,7 @@ export default async function HomePage() {
       title: "Best Business Laptops for Nigerian Developers in 2026",
       desc: "Detailed comparison of ThinkPad T-Series vs HP EliteBook 840 for long battery life and heavy Docker workloads.",
       image: "/images/ui/post_1.jpg",
+      href: "/products/category/laptops",
     },
     {
       id: 2,
@@ -160,6 +161,7 @@ export default async function HomePage() {
       title: "How to Choose the Right Desktop Workstation",
       desc: "Factors to consider when selecting CAD, 3D animation, and deep learning workstation towers.",
       image: "/images/ui/post_2.jpg",
+      href: "/products/category/desktops",
     },
     {
       id: 3,
@@ -167,6 +169,7 @@ export default async function HomePage() {
       title: "Extending Battery Longevity in Refurbished Laptops",
       desc: "Proven configuration tips, charging cycles, and power management settings for maximum daily endurance.",
       image: "/images/ui/post_3.jpg",
+      href: "/products/category/business-laptops",
     },
     {
       id: 4,
@@ -174,6 +177,7 @@ export default async function HomePage() {
       title: "Why Hardware TPM 2.0 Matters for Remote Work",
       desc: "Essential enterprise security protocols for protecting proprietary company data on portable workstations.",
       image: "/images/ui/post_4.jpg",
+      href: "/products/category/equipment",
     },
   ];
 
@@ -313,6 +317,7 @@ export default async function HomePage() {
               <Link
                 key={idx}
                 href={cat.href}
+                prefetch={true}
                 className="group p-5 bg-white border border-[#EBEBEB] rounded hover:border-amber-400 hover:shadow-xs transition-all flex flex-col items-center justify-between text-center min-h-[170px]"
               >
                 <div className="w-full h-24 flex items-center justify-center mb-3">
@@ -333,46 +338,18 @@ export default async function HomePage() {
       </section>
 
       {/* =========================================================================
-          4. BEST SELLING ITEMS (Hatched Header with Carousel Arrows)
+          4. BEST SELLING ITEMS (Hatched Header with Interactive Carousel Arrows)
           5 Product Cards with Cutouts, 5 Gold Stars, and Yellow Prices
          ========================================================================= */}
       <section className="py-12 bg-white">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
-          {/* Hatched Header with Carousel Arrows */}
-          <div className="flex items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4 flex-1">
-              <h2 className="text-xs sm:text-sm font-light tracking-[0.22em] uppercase text-slate-800 whitespace-nowrap">
-                BEST SELLING ITEMS
-              </h2>
-              <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70"></div>
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <button
-                type="button"
-                aria-label="Previous"
-                className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-800 hover:border-slate-400 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 stroke-[1.5]" />
-              </button>
-              <button
-                type="button"
-                aria-label="Next"
-                className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-800 hover:border-slate-400 transition-colors"
-              >
-                <ChevronRight className="w-4 h-4 stroke-[1.5]" />
-              </button>
-            </div>
-          </div>
-
-          {/* Row of 5 Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <CarouselContainer title="BEST SELLING ITEMS">
             {bestSellers.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border border-[#EBEBEB] rounded p-4 flex flex-col justify-between hover:shadow-xs hover:border-amber-400 transition-all text-center group"
+                className="bg-white border border-[#EBEBEB] rounded p-4 flex flex-col justify-between hover:shadow-xs hover:border-amber-400 transition-all text-center group min-w-[200px] lg:min-w-0 flex-shrink-0 lg:flex-shrink"
               >
-                <Link href={`/products/${item.slug}`} className="block">
+                <Link href={`/products/${item.slug}`} prefetch={true} className="block">
                   <div className="w-full h-32 flex items-center justify-center mb-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -401,7 +378,7 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
-          </div>
+          </CarouselContainer>
         </div>
       </section>
 
@@ -456,7 +433,8 @@ export default async function HomePage() {
 
               <div>
                 <Link
-                  href="/shop?sort=discount"
+                  href="/products/category/laptops?brand=apple"
+                  prefetch={true}
                   className="inline-block bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-[0.16em] px-8 py-3 rounded-full shadow-xs transition-colors"
                 >
                   DISCOVER NOW
@@ -514,42 +492,15 @@ export default async function HomePage() {
       </section>
 
       {/* =========================================================================
-          7. CUSTOMERS REVIEWS (Extra-Light Testimonial Quotes)
+          7. CUSTOMERS REVIEWS (Extra-Light Testimonial Quotes with Interactive Carousel)
          ========================================================================= */}
       <section className="py-14 bg-white border-t border-slate-100">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
-          {/* Hatched Header with Arrows */}
-          <div className="flex items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4 flex-1">
-              <h2 className="text-xs sm:text-sm font-light tracking-[0.22em] uppercase text-slate-800 whitespace-nowrap">
-                CUSTOMERS REVIEWS
-              </h2>
-              <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70"></div>
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <button
-                type="button"
-                aria-label="Previous"
-                className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-800 hover:border-slate-400 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 stroke-[1.5]" />
-              </button>
-              <button
-                type="button"
-                aria-label="Next"
-                className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-800 hover:border-slate-400 transition-colors"
-              >
-                <ChevronRight className="w-4 h-4 stroke-[1.5]" />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ReviewsCarousel>
             {reviews.map((rev) => (
               <div
                 key={rev.id}
-                className="bg-white border border-[#EBEBEB] rounded p-6 flex flex-col justify-between"
+                className="bg-white border border-[#EBEBEB] rounded p-6 flex flex-col justify-between min-w-[280px] md:min-w-0 flex-shrink-0 md:flex-shrink"
               >
                 <div>
                   <p className="text-xs font-extralight text-slate-500 leading-relaxed italic mb-4">
@@ -570,7 +521,7 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
-          </div>
+          </ReviewsCarousel>
         </div>
       </section>
 
@@ -593,7 +544,7 @@ export default async function HomePage() {
                 className="bg-white border border-[#EBEBEB] rounded overflow-hidden flex flex-col justify-between group"
               >
                 <div>
-                  <div className="relative h-36 w-full overflow-hidden bg-slate-100">
+                  <Link href={post.href || "/shop"} prefetch={true} className="block relative h-36 w-full overflow-hidden bg-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={post.image}
@@ -603,12 +554,14 @@ export default async function HomePage() {
                     <span className="absolute top-2 left-2 bg-[#FFB200] text-white font-light text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
                       {post.tag}
                     </span>
-                  </div>
+                  </Link>
 
                   <div className="p-4 space-y-2">
-                    <h3 className="text-xs font-normal text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
+                    <Link href={post.href || "/shop"} prefetch={true} className="block">
+                      <h3 className="text-xs font-normal text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                    </Link>
                     <p className="text-[11px] font-extralight text-slate-400 line-clamp-3 leading-relaxed">
                       {post.desc}
                     </p>
@@ -617,7 +570,8 @@ export default async function HomePage() {
 
                 <div className="p-4 pt-0">
                   <Link
-                    href="/shop"
+                    href={post.href || "/shop"}
+                    prefetch={true}
                     className="text-[11px] font-light text-[#FFB200] hover:text-amber-600 uppercase tracking-wider inline-flex items-center gap-1"
                   >
                     Read More <ArrowRight className="w-3 h-3" />
