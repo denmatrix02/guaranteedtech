@@ -4,10 +4,7 @@ import { SiteLayoutWrapper } from "@/components/layout/SiteLayoutWrapper";
 import { CartProvider } from "@/context/CartContext";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "https://guaranteedtech.vercel.app");
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.guaranteedtech.org";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

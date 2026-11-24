@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: `${meta.name} — GuaranteedTech Nigeria`,
       description: meta.description,
-      url: `https://guaranteedtech.vercel.app/products/category/${slug}`,
+      url: `https://www.guaranteedtech.org/products/category/${slug}`,
     },
   };
 }
