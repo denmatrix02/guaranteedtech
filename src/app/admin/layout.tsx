@@ -85,7 +85,7 @@ export default function AdminLayout({
     { name: "Dashboard", href: "/admin", icon: <LayoutDashboard className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Inventory & Products", href: "/admin/products", icon: <Package className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Homepage CMS", href: "/admin/cms", icon: <SlidersHorizontal className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Facebook Posts", href: "/admin/posts", icon: <Share2 className="w-4 h-4 stroke-[1.4]" /> },
+    { name: "Social Media Posts", href: "/admin/posts", icon: <Share2 className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Orders & Sales", href: "/admin/orders", icon: <ShoppingCart className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Logistics & Dispatch", href: "/admin/logistics", icon: <Truck className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Search Demand", href: "/admin/search-demand", icon: <TrendingUp className="w-4 h-4 stroke-[1.4]" /> },
@@ -94,8 +94,8 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#FAFBFD] flex flex-col lg:flex-row text-slate-800 font-sans">
-      {/* Sidebar - Matching Home/Shop UI Perception */}
-      <aside className="w-full lg:w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0">
+      {/* Sidebar - Fixed to Left Screen Edge on Desktop, Never Scrolling Off */}
+      <aside className="w-full lg:fixed lg:top-0 lg:bottom-0 lg:left-0 lg:w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0 z-30 lg:h-screen lg:overflow-y-auto">
         {/* Brand Header */}
         <div className="h-20 px-6 border-b border-slate-100 flex items-center justify-between">
           <Link href="/admin" className="flex items-center flex-shrink-0">
@@ -168,10 +168,10 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* Main Admin Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Admin Content Area - Offset on Desktop by Fixed Sidebar Width */}
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         {/* Top Header Bar */}
-        <header className="bg-white border-b border-slate-100 px-6 sm:px-8 h-20 flex items-center justify-between">
+        <header className="bg-white border-b border-slate-100 px-6 sm:px-8 h-20 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-2 text-xs font-light text-slate-400">
             <Link href="/" className="hover:text-slate-800 transition-colors">Storefront</Link>
             <ChevronRight className="w-3 h-3 text-slate-300" />

@@ -89,7 +89,7 @@ export const CANONICAL_CATEGORIES: Record<string, { name: string; description: s
   },
   "laptops": {
     name: "Laptops & Ultrabooks",
-    description: "Certified business laptops, executive ultrabooks, and high-performance gaming laptops with 6-month warranty.",
+    description: "Certified business laptops, executive ultrabooks, and high-performance gaming laptops with comprehensive warranty.",
   },
   "business-laptops": {
     name: "Business Laptops",

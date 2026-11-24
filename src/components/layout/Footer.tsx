@@ -142,7 +142,7 @@ export function Footer() {
 
                 {/* Instagram */}
                 <a
-                  href="https://www.instagram.com/guaranteedtech"
+                  href="https://www.instagram.com/guaranteed_tech/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="GuaranteedTech Instagram"
@@ -192,6 +192,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/about" prefetch={true} className="hover:text-blue-600 transition-colors">
+                  About GuaranteedTech
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" prefetch={true} className="hover:text-blue-600 transition-colors">
                   Contact &amp; Showrooms
                 </Link>
@@ -211,8 +216,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" prefetch={true} className="hover:text-blue-600 transition-colors">
-                  6-Month GTC Warranty Policy
+                <Link href="/warranty" prefetch={true} className="hover:text-blue-600 transition-colors">
+                  GTC Warranty (3M Refurbished / 6M Open Box / 1Y Brand New)
                 </Link>
               </li>
               <li>
@@ -295,11 +300,11 @@ export function Footer() {
             Copyright &copy; {new Date().getFullYear()} GuaranteedTech Nigeria. All rights reserved.
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/contact" className="hover:text-slate-600 transition-colors">
+            <Link href="/privacy" className="hover:text-slate-600 transition-colors">
               Privacy Policy
             </Link>
             <span>&bull;</span>
-            <Link href="/contact" className="hover:text-slate-600 transition-colors">
+            <Link href="/terms" className="hover:text-slate-600 transition-colors">
               Terms of Service
             </Link>
             <span>&bull;</span>

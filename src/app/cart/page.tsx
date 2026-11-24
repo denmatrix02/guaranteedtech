@@ -199,7 +199,7 @@ export default function CartPage() {
               </div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#FFB200] flex-shrink-0 stroke-[1.5]" />
-                <span>GuaranteedTech 6-Month Quality Warranty</span>
+                <span>GuaranteedTech Certified Hardware Warranty (3M / 6M / 1Y)</span>
               </div>
               <div className="flex items-center gap-2">
                 <RotateCcw className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 stroke-[1.5]" />

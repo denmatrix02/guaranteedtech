@@ -68,7 +68,13 @@ export async function POST(request: Request) {
         comparePrice: comparePrice ? parseFloat(comparePrice) : null,
         stockQuantity: parseInt(stockQuantity || "1", 10),
         availabilityStatus: parseInt(stockQuantity || "1", 10) > 0 ? "IN_STOCK" : "OUT_OF_STOCK",
-        warrantyMonths: parseInt(warrantyMonths || "6", 10),
+        warrantyMonths: warrantyMonths
+          ? parseInt(warrantyMonths, 10)
+          : condition === "BRAND_NEW"
+          ? 12
+          : condition === "OPEN_BOX"
+          ? 6
+          : 3,
         warrantyDetails,
         shortDescription,
         fullDescription,

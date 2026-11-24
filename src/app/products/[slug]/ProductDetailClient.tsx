@@ -94,10 +94,16 @@ export function ProductDetailClient({ product }: { product: any }) {
                 className={`text-[10px] font-light uppercase tracking-wider px-2.5 py-1 rounded shadow-xs ${
                   product.condition === "BRAND_NEW"
                     ? "bg-emerald-600 text-white"
+                    : product.condition === "OPEN_BOX"
+                    ? "bg-blue-700 text-white"
                     : "bg-slate-900 text-amber-300"
                 }`}
               >
-                {product.condition === "BRAND_NEW" ? "Brand New (Sealed)" : "Refurbished Grade A+"}
+                {product.condition === "BRAND_NEW"
+                  ? `Brand New • 1-Year ${product.brand?.name || "Brand"} Warranty`
+                  : product.condition === "OPEN_BOX"
+                  ? "Open Box • 6M GTC Warranty"
+                  : "Refurbished Grade A+ • 3M GTC Warranty"}
               </span>
               {product.discountPercent && product.discountPercent > 0 && (
                 <span className="bg-red-500 text-white font-light text-[10px] px-2 py-0.5 rounded shadow-xs">
@@ -290,7 +296,13 @@ export function ProductDetailClient({ product }: { product: any }) {
             </div>
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-[#FFB200] flex-shrink-0 stroke-[1.5]" />
-              <span>{product.warrantyMonths || 6}M Warranty Included</span>
+              <span>
+                {product.condition === "BRAND_NEW"
+                  ? `1-Year ${product.brand?.name || "Brand"} Official Warranty`
+                  : product.condition === "OPEN_BOX"
+                  ? "6 Months GTC Warranty Included"
+                  : "3 Months GTC Comprehensive Warranty"}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <RotateCcw className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 stroke-[1.5]" />

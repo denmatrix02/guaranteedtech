@@ -25,8 +25,25 @@ export function AddProductClient({
   const [basePrice, setBasePrice] = useState("");
   const [comparePrice, setComparePrice] = useState("");
   const [stockQuantity, setStockQuantity] = useState("10");
-  const [warrantyMonths, setWarrantyMonths] = useState("6");
-  const [warrantyDetails, setWarrantyDetails] = useState("GuaranteedTech 6-Month Comprehensive Warranty");
+  const [warrantyMonths, setWarrantyMonths] = useState("3");
+  const [warrantyDetails, setWarrantyDetails] = useState("3 Months GTC Comprehensive Diagnostic & Hardware Warranty");
+
+  const handleConditionChange = (newCond: string) => {
+    setCondition(newCond);
+    if (newCond === "BRAND_NEW") {
+      setWarrantyMonths("12");
+      setWarrantyDetails("1-Year Official Brand Manufacturer Warranty");
+      setConditionDetails("Brand New Factory Sealed");
+    } else if (newCond === "OPEN_BOX") {
+      setWarrantyMonths("6");
+      setWarrantyDetails("6 Months GTC Comprehensive Warranty");
+      setConditionDetails("Open Box Like-New Condition");
+    } else {
+      setWarrantyMonths("3");
+      setWarrantyDetails("3 Months GTC Comprehensive Diagnostic & Hardware Warranty");
+      setConditionDetails("Grade A+ Certified — 100% GTC Quality Inspected");
+    }
+  };
   const [shortDescription, setShortDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&q=80");
@@ -230,7 +247,7 @@ export function AddProductClient({
           </label>
           <select
             value={condition}
-            onChange={(e) => setCondition(e.target.value)}
+            onChange={(e) => handleConditionChange(e.target.value)}
             className="w-full px-3.5 py-2.5 bg-white border border-[#EBEBEB] rounded text-xs text-slate-900 font-light focus:outline-none focus:border-[#FFB200] transition-colors"
           >
             <option value="REFURBISHED">Refurbished Grade A+</option>

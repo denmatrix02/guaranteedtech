@@ -214,7 +214,7 @@ export default async function CategoryListingPage({
           <div>
             <div className="flex items-center justify-between text-xs font-extralight text-slate-400 mb-6">
               <span>Showing {products.length} certified {products.length === 1 ? "unit" : "units"} in stock</span>
-              <span className="text-emerald-700 font-light">✓ 6-Month GTC Warranty Included</span>
+              <span className="text-emerald-700 font-light">✓ Certified GTC Warranty Included</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

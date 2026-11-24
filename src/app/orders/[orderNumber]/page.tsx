@@ -135,7 +135,7 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
           <div className="pt-2 text-[11px] font-light text-emerald-800 flex flex-wrap items-center gap-x-4 gap-y-1">
             <span>&bull; Verified GIG Logistics Delivery</span>
             <span>&bull; Free Hardware Inspection Before Payment</span>
-            <span>&bull; 6-Month Official GuaranteedTech Warranty</span>
+            <span>&bull; Official GTC Warranty Protection</span>
           </div>
         </div>
 

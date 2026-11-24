@@ -342,7 +342,7 @@ export default function CheckoutPage() {
             </button>
 
             <div className="text-[10px] font-extralight text-slate-400 text-center leading-relaxed">
-              By placing your order, you agree to GuaranteedTech Terms of Service, 6-Month Warranty coverage, and GIG Logistics fulfillment policies.
+              By placing your order, you agree to GuaranteedTech Terms of Service, Official Warranty coverage, and GIG Logistics fulfillment policies.
             </div>
           </div>
         </form>

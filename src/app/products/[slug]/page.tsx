@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
-  const product = await prisma.product.findUnique({
+  let product = await prisma.product.findUnique({
     where: { slug },
     include: {
       brand: true,
@@ -51,6 +51,43 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       },
     },
   });
+
+  if (!product) {
+    // Attempt fallback match for historical or slightly altered slugs
+    const cleanPrefix = slug.replace(/-ssd$/, "").split("-").slice(0, 4).join("-");
+    product = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: { startsWith: cleanPrefix } },
+          { slug: { contains: cleanPrefix } },
+        ],
+      },
+      include: {
+        brand: true,
+        category: {
+          include: { parent: true },
+        },
+        images: { orderBy: { displayOrder: "asc" } },
+        variants: { orderBy: { priceAdjustment: "asc" } },
+        specifications: { orderBy: { displayOrder: "asc" } },
+        reviews: {
+          where: { isApproved: true },
+          orderBy: { createdAt: "desc" },
+        },
+        sourceRelations: {
+          include: {
+            relatedProduct: {
+              include: {
+                brand: true,
+                category: true,
+                images: { orderBy: { displayOrder: "asc" } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
   if (!product) {
     notFound();

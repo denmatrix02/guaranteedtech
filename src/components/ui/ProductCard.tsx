@@ -38,6 +38,16 @@ export function ProductCard({ product, recommendationReason, onAddToCart }: Prod
 
   // WhatsApp Enquiry Link
   const storePhone = "2348067150130";
+
+  // Dynamic Warranty Badge based on condition
+  const warrantyLabel =
+    product.condition === "BRAND_NEW"
+      ? product.brand?.name
+        ? `1-Yr ${product.brand.name} Warranty`
+        : "1-Yr Brand Warranty"
+      : product.condition === "OPEN_BOX"
+      ? "6M GTC Warranty"
+      : "3M GTC Warranty";
   const whatsappText = encodeURIComponent(
     `Hello GuaranteedTech, I'm interested in the ${product.name} (SKU: ${product.sku}) listed for ${formatNaira(product.basePrice)}. Please confirm availability and specs.`
   );
@@ -126,7 +136,7 @@ export function ProductCard({ product, recommendationReason, onAddToCart }: Prod
           </span>
           <span className="inline-flex items-center gap-1 text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded text-[10px] font-light">
             <ShieldCheck className="w-2.5 h-2.5 text-amber-500" />
-            {product.warrantyMonths || 6}M Warranty
+            {warrantyLabel}
           </span>
         </div>
 
