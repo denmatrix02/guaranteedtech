@@ -16,6 +16,7 @@ import {
   ChevronRight,
   LogOut,
   Loader2,
+  Share2,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -84,6 +85,7 @@ export default function AdminLayout({
     { name: "Dashboard", href: "/admin", icon: <LayoutDashboard className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Inventory & Products", href: "/admin/products", icon: <Package className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Homepage CMS", href: "/admin/cms", icon: <SlidersHorizontal className="w-4 h-4 stroke-[1.4]" /> },
+    { name: "Facebook Posts", href: "/admin/posts", icon: <Share2 className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Orders & Sales", href: "/admin/orders", icon: <ShoppingCart className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Logistics & Dispatch", href: "/admin/logistics", icon: <Truck className="w-4 h-4 stroke-[1.4]" /> },
     { name: "Search Demand", href: "/admin/search-demand", icon: <TrendingUp className="w-4 h-4 stroke-[1.4]" /> },

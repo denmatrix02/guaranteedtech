@@ -16,8 +16,8 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  // Query DB to verify active products
-  const [featuredDbProducts, bestSellerDbProducts] = await Promise.all([
+  // Query DB to verify active products and dynamic Facebook posts
+  const [featuredDbProducts, bestSellerDbProducts, latestPostsDbSection] = await Promise.all([
     prisma.product.findMany({
       where: { isFeatured: true, availabilityStatus: "IN_STOCK" },
       take: 4,
@@ -27,6 +27,15 @@ export default async function HomePage() {
       where: { isBestSeller: true, availabilityStatus: "IN_STOCK" },
       take: 5,
       include: { brand: true, category: true, images: { orderBy: { displayOrder: "asc" } } },
+    }),
+    prisma.homepageSection.findUnique({
+      where: { sectionKey: "latest_posts" },
+      include: {
+        banners: {
+          where: { isPublished: true },
+          orderBy: { displayOrder: "asc" },
+        },
+      },
     }),
   ]);
 
@@ -145,41 +154,51 @@ export default async function HomePage() {
     },
   ];
 
-  // 5. Latest Posts exact 1:1 match
-  const posts = [
-    {
-      id: 1,
-      tag: "LAPTOPS",
-      title: "Best Business Laptops for Nigerian Developers in 2026",
-      desc: "Detailed comparison of ThinkPad T-Series vs HP EliteBook 840 for long battery life and heavy Docker workloads.",
-      image: "/images/ui/post_1.jpg",
-      href: "/products/category/laptops",
-    },
-    {
-      id: 2,
-      tag: "ENTERPRISE",
-      title: "How to Choose the Right Desktop Workstation",
-      desc: "Factors to consider when selecting CAD, 3D animation, and deep learning workstation towers.",
-      image: "/images/ui/post_2.jpg",
-      href: "/products/category/desktops",
-    },
-    {
-      id: 3,
-      tag: "TIPS",
-      title: "Extending Battery Longevity in Refurbished Laptops",
-      desc: "Proven configuration tips, charging cycles, and power management settings for maximum daily endurance.",
-      image: "/images/ui/post_3.jpg",
-      href: "/products/category/business-laptops",
-    },
-    {
-      id: 4,
-      tag: "SECURITY",
-      title: "Why Hardware TPM 2.0 Matters for Remote Work",
-      desc: "Essential enterprise security protocols for protecting proprietary company data on portable workstations.",
-      image: "/images/ui/post_4.jpg",
-      href: "/products/category/equipment",
-    },
-  ];
+  // 5. Dynamic Latest Posts from Backend (linking directly to Facebook)
+  const defaultFacebookUrl = "https://www.facebook.com/share/1VKj3gkgd2/?mibextid=wwXIfr";
+  const posts = (latestPostsDbSection?.banners && latestPostsDbSection.banners.length > 0)
+    ? latestPostsDbSection.banners.map((b: any) => ({
+        id: b.id,
+        tag: b.badgeText || "TECH",
+        title: b.title,
+        desc: b.subtitle || "",
+        image: b.imageUrl || "/images/ui/post_1.jpg",
+        facebookUrl: b.targetUrl || defaultFacebookUrl,
+      }))
+    : [
+        {
+          id: "p1",
+          tag: "LAPTOPS",
+          title: "Best Business Laptops for Nigerian Developers in 2026",
+          desc: "Detailed comparison of ThinkPad T-Series vs HP EliteBook 840 for long battery life and heavy Docker workloads.",
+          image: "/images/ui/post_1.jpg",
+          facebookUrl: defaultFacebookUrl,
+        },
+        {
+          id: "p2",
+          tag: "ENTERPRISE",
+          title: "How to Choose the Right Desktop Workstation",
+          desc: "Factors to consider when selecting CAD, 3D animation, and deep learning workstation towers.",
+          image: "/images/ui/post_2.jpg",
+          facebookUrl: defaultFacebookUrl,
+        },
+        {
+          id: "p3",
+          tag: "TIPS",
+          title: "Extending Battery Longevity in Refurbished Laptops",
+          desc: "Proven configuration tips, charging cycles, and power management settings for maximum daily endurance.",
+          image: "/images/ui/post_3.jpg",
+          facebookUrl: defaultFacebookUrl,
+        },
+        {
+          id: "p4",
+          tag: "SECURITY",
+          title: "Why Hardware TPM 2.0 Matters for Remote Work",
+          desc: "Essential enterprise security protocols for protecting proprietary company data on portable workstations.",
+          image: "/images/ui/post_4.jpg",
+          facebookUrl: defaultFacebookUrl,
+        },
+      ];
 
   const brandLogos = ["ECHOTECH", "MiniStore", "ULTRAS", "SWANKY", "EMBL"];
 
@@ -538,46 +557,71 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {posts.map((post) => (
-              <div
+            {posts.map((post: any) => (
+              <article
                 key={post.id}
-                className="bg-white border border-[#EBEBEB] rounded overflow-hidden flex flex-col justify-between group"
+                itemScope
+                itemType="https://schema.org/BlogPosting"
+                className="bg-white border border-[#EBEBEB] rounded overflow-hidden flex flex-col justify-between group hover:border-amber-400 hover:shadow-xs transition-all"
               >
                 <div>
-                  <Link href={post.href || "/shop"} prefetch={true} className="block relative h-36 w-full overflow-hidden bg-slate-100">
+                  <a
+                    href={post.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${post.title} — View full post on Facebook`}
+                    className="block relative h-36 w-full overflow-hidden bg-slate-100"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={post.image}
                       alt={post.title}
+                      itemProp="image"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <span className="absolute top-2 left-2 bg-[#FFB200] text-white font-light text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
                       {post.tag}
                     </span>
-                  </Link>
+                    {/* Verified Facebook Icon badge */}
+                    <span
+                      className="absolute top-2 right-2 bg-blue-600 text-white p-1 rounded-full shadow-xs flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity"
+                      title="Direct Facebook Post"
+                    >
+                      <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                      </svg>
+                    </span>
+                  </a>
 
                   <div className="p-4 space-y-2">
-                    <Link href={post.href || "/shop"} prefetch={true} className="block">
-                      <h3 className="text-xs font-normal text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    <a
+                      href={post.facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <h3 itemProp="headline" className="text-xs font-normal text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">
                         {post.title}
                       </h3>
-                    </Link>
-                    <p className="text-[11px] font-extralight text-slate-400 line-clamp-3 leading-relaxed">
+                    </a>
+                    <p itemProp="description" className="text-[11px] font-extralight text-slate-400 line-clamp-3 leading-relaxed">
                       {post.desc}
                     </p>
                   </div>
                 </div>
 
                 <div className="p-4 pt-0">
-                  <Link
-                    href={post.href || "/shop"}
-                    prefetch={true}
-                    className="text-[11px] font-light text-[#FFB200] hover:text-amber-600 uppercase tracking-wider inline-flex items-center gap-1"
+                  <a
+                    href={post.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-light text-[#FFB200] hover:text-amber-600 uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
                   >
-                    Read More <ArrowRight className="w-3 h-3" />
-                  </Link>
+                    <span>Read More</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </a>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>
