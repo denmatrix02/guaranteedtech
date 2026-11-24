@@ -39,7 +39,7 @@ async function main() {
     data: {
       email: "admin@guaranteedtech.ng",
       passwordHash: adminPassword,
-      name: "Dennis (Super Admin)",
+      name: "Executive Admin",
       phone: "+2348067150130",
       role: "SUPER_ADMIN",
     },

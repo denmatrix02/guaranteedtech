@@ -44,7 +44,7 @@ export async function POST(req: Request) {
           matchedUser = {
             id: "master-admin-01",
             email: cleanEmail,
-            name: "Dennis (Executive Admin)",
+            name: "Executive Admin",
             role: "SUPER_ADMIN",
           } as any;
         }

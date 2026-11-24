@@ -119,7 +119,7 @@ export default function AdminLayout({
             </div>
             <div className="overflow-hidden">
               <span className="text-xs font-normal text-slate-800 block truncate">
-                {operator?.name || "Operations Admin"}
+                {operator?.name || "Executive Admin"}
               </span>
               <span className="text-[10px] font-extralight text-slate-400 block truncate">
                 {operator?.email || "guarateedtech17@gmail.com"}
