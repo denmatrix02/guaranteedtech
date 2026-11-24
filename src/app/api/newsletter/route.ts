@@ -33,10 +33,10 @@ export async function POST(req: Request) {
       data: {
         name: "Newsletter Subscriber",
         email,
-        phone: "N/A",
-        enquiryType: "NEWSLETTER_SUBSCRIBE",
+        phone: "+2348000000000",
+        enquiryType: "PRODUCT_SOURCING",
         message: "Customer subscribed to GuaranteedTech deal alerts and price drops via website footer.",
-        status: "RESOLVED",
+        status: "PENDING",
       },
     });
 
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error("Newsletter subscription error:", err);
     return NextResponse.json(
-      { success: false, error: "Failed to process subscription. Please try again." },
+      { success: false, error: err?.message || "Failed to process subscription. Please try again." },
       { status: 500 }
     );
   }
