@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Heart, MessageSquare, Check, ShieldCheck } from "lucide-react";
+import { ShoppingCart, Heart, MessageSquare, Check } from "lucide-react";
 import { formatNaira } from "@/lib/currency";
+import { useCart } from "@/context/CartContext";
 
 export interface ProductCardProps {
   product: {
@@ -20,6 +21,7 @@ export interface ProductCardProps {
     availabilityStatus: string;
     stockQuantity: number;
     warrantyMonths?: number;
+    warrantyDetails?: string | null;
     images: { url: string; altText?: string | null }[];
     brand?: { name: string; slug: string } | null;
     series?: string | null;
@@ -33,25 +35,43 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, recommendationReason, onAddToCart }: ProductCardProps) {
+  const { addToCart } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
+
   const primaryImage = product.images?.[0]?.url || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&q=80";
   const isOutOfStock = product.stockQuantity <= 0 || product.availabilityStatus === "OUT_OF_STOCK";
 
   // WhatsApp Enquiry Link
   const storePhone = "2348067150130";
-
-  // Dynamic Warranty Badge based on condition
-  const warrantyLabel =
-    product.condition === "BRAND_NEW"
-      ? product.brand?.name
-        ? `1-Yr ${product.brand.name} Warranty`
-        : "1-Yr Brand Warranty"
-      : product.condition === "OPEN_BOX"
-      ? "6M GTC Warranty"
-      : "3M GTC Warranty";
   const whatsappText = encodeURIComponent(
     `Hello GuaranteedTech, I'm interested in the ${product.name} (SKU: ${product.sku}) listed for ${formatNaira(product.basePrice)}. Please confirm availability and specs.`
   );
   const whatsappUrl = `https://wa.me/${storePhone}?text=${whatsappText}`;
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) return;
+    addToCart({
+      productId: product.id,
+      variantId: null,
+      product: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        basePrice: product.basePrice,
+        comparePrice: product.comparePrice,
+        imageUrl: primaryImage,
+        sku: product.sku,
+        condition: product.condition,
+      },
+      variant: null,
+      quantity: 1,
+      unitPrice: product.basePrice,
+      totalPrice: product.basePrice,
+    });
+    if (onAddToCart) onAddToCart(product.id);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   return (
     <div className="group relative flex flex-col bg-white rounded border border-[#EBEBEB] hover:border-[#FFB200] hover:shadow-xs transition-all duration-200 overflow-hidden">
@@ -66,47 +86,33 @@ export function ProductCard({ product, recommendationReason, onAddToCart }: Prod
         </div>
       )}
 
-      {/* Badges Bar (Condition & Discount) */}
+      {/* Badges Bar (Discount) */}
       <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 pointer-events-none">
         {product.discountPercent && product.discountPercent > 0 ? (
           <span className="bg-red-500 text-white font-light text-[10px] tracking-wider px-2 py-0.5 rounded shadow-xs">
             -{product.discountPercent}% OFF
           </span>
         ) : null}
-        <span
-          className={`text-[9px] font-light uppercase tracking-wider px-2 py-0.5 rounded shadow-xs ${
-            product.condition === "BRAND_NEW"
-              ? "bg-emerald-600 text-white"
-              : "bg-slate-900 text-amber-300"
-          }`}
-        >
-          {product.condition === "BRAND_NEW" ? "Brand New" : "Refurbished A+"}
-        </span>
       </div>
 
-      {/* Wishlist Button */}
-      <button
-        type="button"
-        aria-label="Add to Wishlist"
-        className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/90 hover:bg-white text-slate-400 hover:text-red-500 shadow-xs border border-slate-100 transition-colors"
+      {/* Image Container with Exact 4:3 Aspect Ratio */}
+      <Link
+        href={`/products/${product.slug}`}
+        className="block relative aspect-[4/3] w-full bg-white p-4 overflow-hidden border-b border-slate-50"
       >
-        <Heart className="w-3.5 h-3.5" />
-      </button>
-
-      {/* Image Container with Zoom */}
-      <Link href={`/products/${product.slug}`} className="relative w-full pt-[75%] bg-white overflow-hidden block">
         <Image
           src={primaryImage}
           alt={product.name}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
         />
       </Link>
 
-      {/* Card Body */}
+      {/* Product Details */}
       <div className="p-4 flex flex-col flex-1">
-        {/* Brand & Series */}
+        {/* Brand & SKU */}
         <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
           <span className="font-light uppercase tracking-wider text-slate-500">
             {product.brand?.name || "GuaranteedTech"} {product.series ? `• ${product.series}` : ""}
@@ -128,15 +134,11 @@ export function ProductCard({ product, recommendationReason, onAddToCart }: Prod
           </p>
         )}
 
-        {/* Stock & Warranty Indicators */}
+        {/* Stock Indicator - Clean, zero default warranty assumptions */}
         <div className="flex items-center gap-2 text-xs text-slate-400 mb-3">
-          <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50/80 px-1.5 py-0.5 rounded text-[10px] font-light">
+          <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50/80 px-2 py-0.5 rounded text-[10px] font-light">
             <Check className="w-2.5 h-2.5 text-emerald-600" />
             {isOutOfStock ? "Sourcing On Request" : "In Stock"}
-          </span>
-          <span className="inline-flex items-center gap-1 text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded text-[10px] font-light">
-            <ShieldCheck className="w-2.5 h-2.5 text-amber-500" />
-            {warrantyLabel}
           </span>
         </div>
 
@@ -158,16 +160,26 @@ export function ProductCard({ product, recommendationReason, onAddToCart }: Prod
         <div className="mt-3 grid grid-cols-5 gap-2">
           <button
             type="button"
-            onClick={() => onAddToCart && onAddToCart(product.id)}
+            onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`col-span-4 flex items-center justify-center gap-1.5 py-2 px-3 rounded font-light text-xs uppercase tracking-wider transition-colors shadow-xs ${
+            className={`col-span-4 flex items-center justify-center gap-1.5 py-2 px-3 rounded font-light text-xs uppercase tracking-wider transition-all shadow-xs ${
               isOutOfStock
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                : "bg-[#FFB200] hover:bg-[#FFA500] text-white"
+                : isAdded
+                ? "bg-emerald-600 text-white font-medium"
+                : "bg-[#FFB200] hover:bg-[#FFA500] text-white cursor-pointer active:scale-95"
             }`}
           >
-            <ShoppingCart className="w-3.5 h-3.5" />
-            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            {isAdded ? (
+              <>
+                <Check className="w-3.5 h-3.5 stroke-[2]" /> Added to Cart!
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-3.5 h-3.5" />
+                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+              </>
+            )}
           </button>
 
           <a
@@ -184,4 +196,3 @@ export function ProductCard({ product, recommendationReason, onAddToCart }: Prod
     </div>
   );
 }
-

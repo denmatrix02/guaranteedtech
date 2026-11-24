@@ -30,6 +30,7 @@ export function ProductDetailClient({ product }: { product: any }) {
   const [selectedVariant, setSelectedVariant] = useState<any>(defaultVariant);
   const [quantity, setQuantity] = useState(1);
   const [isCopied, setIsCopied] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
 
   // Compute live price with variant adjustment
   const currentPrice = product.basePrice + (selectedVariant?.priceAdjustment || 0);
@@ -68,6 +69,8 @@ export function ProductDetailClient({ product }: { product: any }) {
       unitPrice: currentPrice,
       totalPrice: currentPrice * quantity,
     });
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
@@ -100,10 +103,10 @@ export function ProductDetailClient({ product }: { product: any }) {
                 }`}
               >
                 {product.condition === "BRAND_NEW"
-                  ? `Brand New • 1-Year ${product.brand?.name || "Brand"} Warranty`
+                  ? "Brand New (Factory Sealed)"
                   : product.condition === "OPEN_BOX"
-                  ? "Open Box • 6M GTC Warranty"
-                  : "Refurbished Grade A+ • 3M GTC Warranty"}
+                  ? "Open Box (Like New)"
+                  : "Refurbished (Certified Grade A+)"}
               </span>
               {product.discountPercent && product.discountPercent > 0 && (
                 <span className="bg-red-500 text-white font-light text-[10px] px-2 py-0.5 rounded shadow-xs">
@@ -256,13 +259,23 @@ export function ProductDetailClient({ product }: { product: any }) {
                   type="button"
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className={`w-full py-3 px-6 rounded font-light text-xs uppercase tracking-[0.14em] flex items-center justify-center gap-2 transition-colors shadow-xs ${
+                  className={`w-full py-3 px-6 rounded font-light text-xs uppercase tracking-[0.14em] flex items-center justify-center gap-2 transition-all shadow-xs ${
                     isOutOfStock
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-[#FFB200] hover:bg-[#FFA500] text-white"
+                      : isAdded
+                      ? "bg-emerald-600 text-white font-medium"
+                      : "bg-[#FFB200] hover:bg-[#FFA500] text-white cursor-pointer active:scale-95"
                   }`}
                 >
-                  <ShoppingCart className="w-3.5 h-3.5" /> Add to Cart
+                  {isAdded ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 stroke-[2]" /> Added to Cart!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-3.5 h-3.5" /> Add to Cart
+                    </>
+                  )}
                 </button>
 
                 <button
@@ -297,11 +310,10 @@ export function ProductDetailClient({ product }: { product: any }) {
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-[#FFB200] flex-shrink-0 stroke-[1.5]" />
               <span>
-                {product.condition === "BRAND_NEW"
-                  ? `1-Year ${product.brand?.name || "Brand"} Official Warranty`
-                  : product.condition === "OPEN_BOX"
-                  ? "6 Months GTC Warranty Included"
-                  : "3 Months GTC Comprehensive Warranty"}
+                {product.warrantyDetails ||
+                  (product.warrantyMonths && product.warrantyMonths > 0
+                    ? `${product.warrantyMonths} Months Warranty Included`
+                    : "GTC Quality Guarantee")}
               </span>
             </div>
             <div className="flex items-center gap-2">
