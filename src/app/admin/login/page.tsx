@@ -30,8 +30,8 @@ export default function AdminLoginPage() {
         throw new Error(data.error || "Authentication failed.");
       }
 
-      router.push("/admin");
-      router.refresh();
+      // Use hard navigation to guarantee cookie persistence across all mobile/desktop browsers
+      window.location.href = "/admin";
     } catch (err: any) {
       setErrorMessage(err.message || "Invalid operator credentials.");
     } finally {
@@ -84,9 +84,12 @@ export default function AdminLoginPage() {
                 <input
                   type="email"
                   required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@guaranteedtech.ng"
+                  placeholder="admin@guaranteedtech.org"
                   className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-[#EBEBEB] rounded text-xs text-slate-800 font-light focus:outline-none focus:border-[#FFB200] transition-colors"
                 />
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 stroke-[1.4]" />
@@ -101,6 +104,9 @@ export default function AdminLoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"

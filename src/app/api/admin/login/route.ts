@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signAdminToken, ADMIN_COOKIE_NAME } from "@/lib/adminAuth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
@@ -14,40 +17,63 @@ export async function POST(req: Request) {
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanPassword = String(password).trim();
 
-    // 1. Try to find user in database
-    let matchedUser = await prisma.user.findFirst({
-      where: {
-        email: cleanEmail,
-        role: { in: ["SUPER_ADMIN", "STORE_MANAGER", "INVENTORY_MANAGER", "ORDER_MANAGER"] },
-        isActive: true,
-      },
-    });
+    // Check if it's one of the official admin identifier aliases
+    const isMasterAdminEmail =
+      cleanEmail === "admin@guaranteedtech.ng" ||
+      cleanEmail === "admin@guaranteedtech.org" ||
+      cleanEmail === "guaranteedtech17@gmail.com" ||
+      cleanEmail === "guarateedtech17@gmail.com" ||
+      cleanEmail === "admin" ||
+      cleanEmail === "executive@guaranteedtech.org" ||
+      cleanEmail === "executive@guaranteedtech.ng" ||
+      cleanEmail === "executive";
 
+    // Tolerant check for master password (covers mobile capitalization and accidental missing punctuation)
+    const isMasterPassword =
+      cleanPassword === "Admin@GT2026!" ||
+      cleanPassword === "admin@gt2026!" ||
+      cleanPassword === "Admin@gt2026!" ||
+      cleanPassword === "admin@GT2026!" ||
+      cleanPassword === "Admin@GT2026" ||
+      cleanPassword === "admin@gt2026";
+
+    let matchedUser: any = null;
     let isValid = false;
 
-    if (matchedUser) {
-      isValid = await bcrypt.compare(password, matchedUser.passwordHash);
+    // 1. Check database for existing operator account (in a safe try-catch so transient DB pooler issues never block login)
+    try {
+      const searchEmails = isMasterAdminEmail
+        ? ["admin@guaranteedtech.org", "admin@guaranteedtech.ng", "guaranteedtech17@gmail.com", cleanEmail]
+        : [cleanEmail];
+
+      matchedUser = await prisma.user.findFirst({
+        where: {
+          email: { in: searchEmails },
+          role: { in: ["SUPER_ADMIN", "STORE_MANAGER", "INVENTORY_MANAGER", "ORDER_MANAGER"] },
+          isActive: true,
+        },
+      });
+
+      if (matchedUser && matchedUser.passwordHash) {
+        isValid = await bcrypt.compare(cleanPassword, matchedUser.passwordHash);
+      }
+    } catch (dbErr) {
+      console.warn("Database lookup warning during admin login (proceeding with fallback verification):", dbErr);
     }
 
-    // 2. Fallback check for master administrative credentials (admin@guaranteedtech.ng / guarateedtech17@gmail.com with Admin@GT2026!)
-    if (!isValid) {
-      const isMasterAdminEmail =
-        cleanEmail === "admin@guaranteedtech.ng" ||
-        cleanEmail === "guarateedtech17@gmail.com" ||
-        cleanEmail === "admin";
-
-      if (isMasterAdminEmail && password === "Admin@GT2026!") {
-        isValid = true;
-        if (!matchedUser) {
-          matchedUser = {
-            id: "master-admin-01",
-            email: cleanEmail,
-            name: "Executive Admin",
-            role: "SUPER_ADMIN",
-          } as any;
-        }
+    // 2. Master Administrative Credentials verification fallback
+    if (!isValid && isMasterAdminEmail && isMasterPassword) {
+      isValid = true;
+      if (!matchedUser) {
+        matchedUser = {
+          id: "master-admin-01",
+          email: cleanEmail.includes("@") ? cleanEmail : "admin@guaranteedtech.org",
+          name: "Executive Admin",
+          role: "SUPER_ADMIN",
+        };
       }
     }
 
@@ -62,7 +88,7 @@ export async function POST(req: Request) {
     const token = signAdminToken({
       userId: matchedUser.id,
       email: matchedUser.email,
-      name: matchedUser.name,
+      name: matchedUser.name || "Executive Admin",
       role: matchedUser.role,
     });
 
@@ -71,12 +97,12 @@ export async function POST(req: Request) {
       user: {
         id: matchedUser.id,
         email: matchedUser.email,
-        name: matchedUser.name,
+        name: matchedUser.name || "Executive Admin",
         role: matchedUser.role,
       },
     });
 
-    // 4. Set secure HTTP-only cookie
+    // 4. Set secure HTTP-only cookie with sameSite: "lax"
     response.cookies.set({
       name: ADMIN_COOKIE_NAME,
       value: token,
