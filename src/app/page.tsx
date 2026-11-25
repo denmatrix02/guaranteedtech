@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { formatNaira } from "@/lib/currency";
 import { CarouselContainer } from "@/components/ui/CarouselContainer";
 import { ReviewsCarousel } from "@/components/ui/ReviewsCarousel";
+import { CategoryCarousel } from "@/components/home/CategoryCarousel";
 import {
   ShoppingCart,
   Award,
@@ -345,42 +346,12 @@ export default async function HomePage() {
       </section>
 
       {/* =========================================================================
-          3. CATEGORIES SECTION (Hatched Line Header //////////////////////////////)
-          6 Cards: Printers, Projectors, Equipment, Desktops, Inks & Toner, Laptops
+          3. CATEGORIES SECTION (Interactive Side-to-Side Scroll Carousel)
+          11 Official Categories + "See All" Option to Main Shop
          ========================================================================= */}
-      <section className="py-14 bg-white">
+      <section className="py-12 bg-white">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
-          {/* Hatched Section Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-xs sm:text-sm font-light tracking-[0.22em] uppercase text-slate-800 whitespace-nowrap">
-              CATEGORIES
-            </h2>
-            <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70"></div>
-          </div>
-
-          {/* 6 Category Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {uiCategories.map((cat, idx) => (
-              <Link
-                key={idx}
-                href={cat.href}
-                prefetch={true}
-                className="group p-5 bg-white border border-[#EBEBEB] rounded hover:border-amber-400 hover:shadow-xs transition-all flex flex-col items-center justify-between text-center min-h-[170px]"
-              >
-                <div className="w-full h-24 flex items-center justify-center mb-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="max-h-20 max-w-full object-contain group-hover:scale-105 transition-transform duration-200"
-                  />
-                </div>
-                <span className="text-[11px] font-light tracking-wide text-slate-600 group-hover:text-amber-600 transition-colors">
-                  {cat.name}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <CategoryCarousel />
         </div>
       </section>
 

@@ -1,8 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import { getFilteredProducts } from "@/lib/search";
-import { normalizeCategorySlug, getCategoryMetadata } from "@/lib/categories";
+import {
+  normalizeCategorySlug,
+  getCategoryMetadata,
+  getCategoryFilterConfig,
+  OFFICIAL_CATEGORIES,
+} from "@/lib/categories";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { formatNaira } from "@/lib/currency";
 import { Filter, X, SlidersHorizontal, ArrowUpDown } from "lucide-react";
@@ -37,38 +41,26 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     ? [params.condition]
     : undefined;
 
-  const usageList = Array.isArray(params.usage)
-    ? params.usage
-    : params.usage
-    ? [params.usage]
-    : undefined;
-
   const minPrice = params.minPrice ? parseFloat(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? parseFloat(params.maxPrice) : undefined;
   const sort = (params.sort as any) || "featured";
 
   const canonicalCategory = normalizeCategorySlug(params.category);
   const categoryMeta = canonicalCategory ? getCategoryMetadata(canonicalCategory) : null;
-  const pageTitle = categoryMeta ? categoryMeta.name : "Computing Catalog";
+  const pageTitle = categoryMeta ? categoryMeta.name : "Hardware & IT Equipment Catalog";
+
+  // Dynamic filter configuration (Brands, Budget Ranges, and Conditions change depending on the category selected!)
+  const filterConfig = getCategoryFilterConfig(canonicalCategory);
 
   // Execute database query using our filtered products helper
-  const [products, allCategories, allBrands] = await Promise.all([
-    getFilteredProducts({
-      category: canonicalCategory || params.category,
-      brand: brandList,
-      condition: conditionList as any,
-      minPrice,
-      maxPrice,
-      sort,
-    }),
-    prisma.category.findMany({
-      orderBy: { displayOrder: "asc" },
-      include: { subcategories: true },
-    }),
-    prisma.brand.findMany({
-      orderBy: { name: "asc" },
-    }),
-  ]);
+  const products = await getFilteredProducts({
+    category: canonicalCategory || params.category,
+    brand: brandList,
+    condition: conditionList as any,
+    minPrice,
+    maxPrice,
+    sort,
+  });
 
   const hasActiveFilters =
     Boolean(params.category) ||
@@ -83,11 +75,15 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         {/* Breadcrumb & Title */}
         <div className="mb-6">
           <nav className="flex items-center gap-2 text-xs font-light text-slate-400 mb-2">
-            <Link href="/" prefetch={true} className="hover:text-slate-800 transition-colors">Home</Link>
+            <Link href="/" prefetch={true} className="hover:text-slate-800 transition-colors">
+              Home
+            </Link>
             <span>/</span>
             {categoryMeta ? (
               <>
-                <Link href="/shop" prefetch={true} className="hover:text-slate-800 transition-colors">Shop</Link>
+                <Link href="/shop" prefetch={true} className="hover:text-slate-800 transition-colors">
+                  Shop
+                </Link>
                 <span>/</span>
                 <span className="text-slate-800 font-normal">{categoryMeta.name}</span>
               </>
@@ -95,6 +91,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               <span className="text-slate-800 font-normal">Shop All Products</span>
             )}
           </nav>
+
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-light text-slate-800 tracking-wide uppercase">
@@ -102,13 +99,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               </h1>
               <p className="text-xs font-extralight text-slate-400 mt-1">
                 Showing {products.length} {products.length === 1 ? "system" : "systems"} available in stock
+                {categoryMeta && ` • ${categoryMeta.description}`}
               </p>
             </div>
 
             {/* Sorting Dropdown */}
             <div className="flex items-center gap-3">
               <form method="GET" action="/shop" className="flex items-center gap-2">
-                {/* Preserve existing filters in hidden fields */}
                 {params.category && <input type="hidden" name="category" value={params.category} />}
                 {brandList?.map((b) => (
                   <input key={b} type="hidden" name="brand" value={b} />
@@ -116,6 +113,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 {conditionList?.map((c) => (
                   <input key={c} type="hidden" name="condition" value={c} />
                 ))}
+                {minPrice !== undefined && <input type="hidden" name="minPrice" value={minPrice} />}
+                {maxPrice !== undefined && <input type="hidden" name="maxPrice" value={maxPrice} />}
 
                 <label htmlFor="sort" className="text-xs font-light text-slate-500 flex items-center gap-1">
                   <ArrowUpDown className="w-3 h-3 stroke-[1.5]" /> Sort:
@@ -134,7 +133,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 </select>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 bg-[#FFB200] hover:bg-[#FFA500] text-white rounded text-xs font-light uppercase tracking-wider transition-colors shadow-xs"
+                  className="px-3 py-1.5 bg-[#FFB200] hover:bg-[#FFA500] text-white rounded text-xs font-light uppercase tracking-wider transition-colors shadow-2xs"
                 >
                   Apply
                 </button>
@@ -153,13 +152,19 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               </span>
             )}
             {brandList?.map((b) => (
-              <span key={b} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-slate-50 text-slate-700 text-xs font-light border border-slate-200">
+              <span
+                key={b}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-slate-50 text-slate-700 text-xs font-light border border-slate-200"
+              >
                 Brand: {b.toUpperCase()}
               </span>
             ))}
             {conditionList?.map((c) => (
-              <span key={c} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-slate-50 text-slate-700 text-xs font-light border border-slate-200">
-                Condition: {c}
+              <span
+                key={c}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-slate-50 text-slate-700 text-xs font-light border border-slate-200"
+              >
+                Condition: {c.replace(/_/g, " ")}
               </span>
             ))}
             {(minPrice || maxPrice) && (
@@ -182,7 +187,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <aside className="lg:col-span-3 bg-white p-5 rounded border border-[#EBEBEB] space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-light text-xs uppercase tracking-[0.16em] text-slate-800 flex items-center gap-1.5">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#FFB200] stroke-[1.5]" /> Filters
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#FFB200] stroke-[1.5]" /> Department &amp; Filters
               </h3>
               {hasActiveFilters && (
                 <Link href="/shop" className="text-[11px] font-light text-amber-600 hover:underline">
@@ -191,7 +196,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               )}
             </div>
 
-            {/* Filter 1: Categories */}
+            {/* Filter 1: 11+ Official Categories Requested by Store Owner */}
             <div>
               <h4 className="text-xs font-normal uppercase tracking-wider text-slate-800 mb-2.5">
                 Categories
@@ -209,20 +214,21 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                     All Categories
                   </Link>
                 </li>
-                {allCategories.map((c: any) => {
-                  const isSelected = params.category === c.slug || canonicalCategory === c.slug;
+                {OFFICIAL_CATEGORIES.map((cat) => {
+                  const isSelected = canonicalCategory === cat.slug || params.category === cat.slug;
                   return (
-                    <li key={c.id}>
+                    <li key={cat.slug}>
                       <Link
-                        href={`/shop?category=${c.slug}`}
+                        href={`/shop?category=${cat.slug}`}
                         prefetch={true}
-                        className={`block px-2.5 py-1.5 rounded font-light transition-colors ${
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded font-light transition-colors ${
                           isSelected
-                            ? "bg-[#FFB200] text-white"
+                            ? "bg-[#FFB200] text-white font-normal"
                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                         }`}
                       >
-                        {c.name}
+                        <span>{cat.name}</span>
+                        {isSelected && <span className="text-[10px]">●</span>}
                       </Link>
                     </li>
                   );
@@ -230,76 +236,131 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               </ul>
             </div>
 
-            {/* Filter 2: Brands */}
+            {/* Filter 2: Brands (Dynamically adapted to the selected category) */}
             <div className="pt-4 border-t border-slate-100">
-              <h4 className="text-xs font-normal uppercase tracking-wider text-slate-800 mb-2.5">
-                Brands
-              </h4>
+              <div className="flex items-center justify-between mb-2.5">
+                <h4 className="text-xs font-normal uppercase tracking-wider text-slate-800">
+                  Brands
+                </h4>
+                {categoryMeta && (
+                  <span className="text-[10px] font-extralight text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                    {categoryMeta.name.split(" ")[0]}
+                  </span>
+                )}
+              </div>
               <div className="space-y-1.5">
-                {allBrands.map((b: any) => {
+                {filterConfig.brands.map((b) => {
                   const isChecked = brandList?.includes(b.slug);
+                  // Toggle brand in query string
+                  let newBrands: string[];
+                  if (isChecked) {
+                    newBrands = (brandList || []).filter((item) => item !== b.slug);
+                  } else {
+                    newBrands = [...(brandList || []), b.slug];
+                  }
+
+                  const queryObj = new URLSearchParams();
+                  if (params.category) queryObj.set("category", params.category);
+                  newBrands.forEach((item) => queryObj.append("brand", item));
+                  if (conditionList) conditionList.forEach((c) => queryObj.append("condition", c));
+                  if (minPrice !== undefined) queryObj.set("minPrice", minPrice.toString());
+                  if (maxPrice !== undefined) queryObj.set("maxPrice", maxPrice.toString());
+                  if (sort && sort !== "featured") queryObj.set("sort", sort);
+
                   return (
                     <Link
-                      key={b.id}
-                      href={`/shop?brand=${b.slug}${params.category ? `&category=${params.category}` : ""}`}
-                      className="flex items-center justify-between text-xs font-light text-slate-600 hover:text-slate-900 py-0.5"
+                      key={b.slug}
+                      href={`/shop?${queryObj.toString()}`}
+                      prefetch={true}
+                      className="flex items-center justify-between text-xs font-light text-slate-600 hover:text-slate-900 py-0.5 group"
                     >
                       <span className={isChecked ? "font-normal text-amber-600" : ""}>
                         {b.name}
                       </span>
-                      {isChecked && <span className="text-amber-500 font-bold">✓</span>}
+                      <span
+                        className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[10px] ${
+                          isChecked
+                            ? "bg-[#FFB200] border-[#FFB200] text-white"
+                            : "border-slate-300 group-hover:border-slate-400"
+                        }`}
+                      >
+                        {isChecked && "✓"}
+                      </span>
                     </Link>
                   );
                 })}
               </div>
             </div>
 
-            {/* Filter 3: Condition */}
+            {/* Filter 3: Condition (Dynamically adapted to hardware type) */}
             <div className="pt-4 border-t border-slate-100">
               <h4 className="text-xs font-normal uppercase tracking-wider text-slate-800 mb-2.5">
                 Condition
               </h4>
               <div className="space-y-1 text-xs">
-                {[
-                  { label: "Brand New (Factory Sealed)", val: "BRAND_NEW" },
-                  { label: "Refurbished (GTC Certified)", val: "REFURBISHED" },
-                  { label: "Open Box", val: "OPEN_BOX" },
-                ].map((cond) => (
-                  <Link
-                    key={cond.val}
-                    href={`/shop?condition=${cond.val}${params.category ? `&category=${params.category}` : ""}`}
-                    className={`block px-2.5 py-1.5 rounded font-light transition-colors ${
-                      conditionList?.includes(cond.val)
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {cond.label}
-                  </Link>
-                ))}
+                {filterConfig.conditions.map((cond) => {
+                  const isSelected = conditionList?.includes(cond.val);
+                  const queryObj = new URLSearchParams();
+                  if (params.category) queryObj.set("category", params.category);
+                  if (brandList) brandList.forEach((b) => queryObj.append("brand", b));
+                  if (!isSelected) {
+                    queryObj.append("condition", cond.val);
+                  }
+                  if (minPrice !== undefined) queryObj.set("minPrice", minPrice.toString());
+                  if (maxPrice !== undefined) queryObj.set("maxPrice", maxPrice.toString());
+                  if (sort && sort !== "featured") queryObj.set("sort", sort);
+
+                  return (
+                    <Link
+                      key={cond.val}
+                      href={`/shop?${queryObj.toString()}`}
+                      prefetch={true}
+                      className={`block px-2.5 py-1.5 rounded font-light transition-colors ${
+                        isSelected
+                          ? "bg-slate-900 text-white font-normal"
+                          : "text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {cond.label}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Filter 4: Price Ranges in Naira */}
+            {/* Filter 4: Budget Price Ranges in Naira (Dynamically scaled to category) */}
             <div className="pt-4 border-t border-slate-100">
               <h4 className="text-xs font-normal uppercase tracking-wider text-slate-800 mb-2.5">
                 Budget (₦)
               </h4>
               <div className="space-y-1 text-xs">
-                {[
-                  { label: "Under ₦500,000", max: 500000 },
-                  { label: "₦500,000 – ₦800,000", min: 500000, max: 800000 },
-                  { label: "₦800,000 – ₦1,500,000", min: 800000, max: 1500000 },
-                  { label: "₦1,500,000 & Above", min: 1500000 },
-                ].map((range, idx) => (
-                  <Link
-                    key={idx}
-                    href={`/shop?${range.min ? `minPrice=${range.min}&` : ""}${range.max ? `maxPrice=${range.max}&` : ""}${params.category ? `category=${params.category}` : ""}`}
-                    className="block px-2.5 py-1.5 rounded text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-light"
-                  >
-                    {range.label}
-                  </Link>
-                ))}
+                {filterConfig.budgetRanges.map((range, idx) => {
+                  const queryObj = new URLSearchParams();
+                  if (params.category) queryObj.set("category", params.category);
+                  if (brandList) brandList.forEach((b) => queryObj.append("brand", b));
+                  if (conditionList) conditionList.forEach((c) => queryObj.append("condition", c));
+                  if (range.min !== undefined) queryObj.set("minPrice", range.min.toString());
+                  if (range.max !== undefined) queryObj.set("maxPrice", range.max.toString());
+                  if (sort && sort !== "featured") queryObj.set("sort", sort);
+
+                  const isRangeActive =
+                    minPrice === range.min && maxPrice === range.max;
+
+                  return (
+                    <Link
+                      key={idx}
+                      href={`/shop?${queryObj.toString()}`}
+                      prefetch={true}
+                      className={`block px-2.5 py-1.5 rounded transition-colors font-light ${
+                        isRangeActive
+                          ? "bg-amber-100/70 text-amber-900 font-normal border border-amber-300/60"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      }`}
+                    >
+                      {range.label}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -307,14 +368,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <div className="pt-4 border-t border-slate-100 bg-amber-50/50 -mx-5 -mb-5 p-5 rounded-b border-t border-amber-100">
               <h5 className="font-normal text-xs text-amber-900 mb-1">Confused by specs?</h5>
               <p className="text-[11px] font-extralight text-amber-800 leading-snug mb-3">
-                Let our Smart Finder match your exact coding, design or business requirements.
+                Let our technical specialists recommend the exact hardware for your setup.
               </p>
-              <Link
-                href="/smart-finder"
-                className="w-full block text-center py-2 bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-wider rounded transition-colors shadow-xs"
+              <a
+                href="https://wa.me/2348067150130?text=Hello%20GuaranteedTech,%20I%20need%20a%20hardware%20recommendation"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full block text-center py-2 bg-[#FFB200] hover:bg-[#FFA500] text-slate-950 font-normal text-xs uppercase tracking-wider rounded transition-colors shadow-2xs"
               >
-                Open Smart Finder
-              </Link>
+                Chat with Technician
+              </a>
             </div>
           </aside>
 
@@ -329,12 +392,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                   No products matched your exact filter combination
                 </h3>
                 <p className="text-xs font-extralight text-slate-400 max-w-md mx-auto">
-                  Try clearing some filters or budget constraints, or contact our team directly on WhatsApp to check custom procurement options.
+                  Try clearing some brand or budget filters, or reach out directly to our sourcing desk on WhatsApp for instant inventory confirmation.
                 </p>
                 <div className="flex justify-center gap-3 pt-2">
                   <Link
                     href="/shop"
-                    className="px-5 py-2 bg-[#FFB200] text-white font-light text-xs uppercase tracking-wider rounded hover:bg-[#FFA500] transition-colors"
+                    className="px-5 py-2 bg-[#FFB200] text-slate-950 font-light text-xs uppercase tracking-wider rounded hover:bg-[#FFA500] transition-colors"
                   >
                     Reset All Filters
                   </Link>
@@ -361,4 +424,3 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     </div>
   );
 }
-
