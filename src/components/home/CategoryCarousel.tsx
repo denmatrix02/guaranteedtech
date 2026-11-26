@@ -149,9 +149,9 @@ export function CategoryCarousel({
                 />
               </div>
 
-              {/* Bottom: Category Name & Shop Action */}
+              {/* Bottom: Category Name & Shop Action (1:1 matching Best Selling Items typography: text-xs font-light text-slate-700) */}
               <div className="w-full pt-2 border-t border-slate-100/80">
-                <h3 className="text-xs sm:text-[13px] font-medium text-slate-800 group-hover:text-amber-600 transition-colors line-clamp-1">
+                <h3 className="text-xs font-light text-slate-700 group-hover:text-amber-600 transition-colors line-clamp-1">
                   {cat.name}
                 </h3>
                 <span className="text-[10px] font-light text-slate-400 group-hover:text-slate-600 mt-0.5 inline-flex items-center gap-1 transition-colors">
@@ -171,7 +171,7 @@ export function CategoryCarousel({
           <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#FFB200] mb-3 group-hover:scale-110 transition-transform">
             <ArrowRight className="w-6 h-6 stroke-[1.8]" />
           </div>
-          <h3 className="text-xs sm:text-sm font-medium tracking-wide uppercase">
+          <h3 className="text-xs font-light tracking-wide uppercase text-slate-200">
             View All Shop
           </h3>
           <p className="text-[10px] font-extralight text-slate-300 mt-1">
