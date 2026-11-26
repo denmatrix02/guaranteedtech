@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" width="100%" height="100%">
+  <defs>
+    <linearGradient id="apBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+    <radialGradient id="ringGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#3B82F6" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#60A5FA" stop-opacity="0" />
+    </radialGradient>
+    <filter id="apShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Wireless Wave Arcs -->
+  <path d="M40 70 A90 90 0 0 1 200 70" fill="none" stroke="#FFB200" stroke-width="2" stroke-linecap="round" opacity="0.4" stroke-dasharray="4 6" />
+  <path d="M60 70 A70 70 0 0 1 180 70" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" opacity="0.6" />
+
+  <!-- Ground Shadow -->
+  <ellipse cx="120" cy="150" rx="70" ry="12" fill="#E2E8F0" opacity="0.7" />
+
+  <!-- Ceiling Dome AP Body -->
+  <g filter="url(#apShadow)">
+    <!-- Base Plate -->
+    <ellipse cx="120" cy="100" rx="68" ry="42" fill="#CBD5E1" />
+    
+    <!-- Smooth Dome -->
+    <ellipse cx="120" cy="95" rx="65" ry="38" fill="url(#apBody)" stroke="#E2E8F0" stroke-width="1.5" />
+    
+    <!-- Central Ring Indicator (Iconic UniFi / Enterprise Style) -->
+    <ellipse cx="120" cy="94" rx="20" ry="12" fill="none" stroke="#3B82F6" stroke-width="3" />
+    <ellipse cx="120" cy="94" rx="14" ry="8" fill="#F8FAFC" />
+    
+    <!-- Small Status LED -->
+    <circle cx="120" cy="94" r="3" fill="#3B82F6" />
+  </g>
+
+  <!-- Subtle Gigabit PoE text tag -->
+  <text x="120" y="122" font-family="sans-serif" font-size="7" font-weight="600" fill="#94A3B8" text-anchor="middle" letter-spacing="1">GIGABIT PoE</text>
+</svg>

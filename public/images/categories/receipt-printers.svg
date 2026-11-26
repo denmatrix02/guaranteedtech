@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3748" />
+      <stop offset="100%" stop-color="#1A202C" />
+    </linearGradient>
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#EDF2F7" />
+    </linearGradient>
+    <filter id="printerShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="120" cy="155" rx="75" ry="12" fill="#E2E8F0" opacity="0.7" />
+
+  <!-- Printer Main Body -->
+  <g filter="url(#printerShadow)">
+    <rect x="50" y="65" width="140" height="85" rx="10" fill="url(#bodyGrad)" />
+    
+    <!-- Top Bevel -->
+    <path d="M50 80 Q50 65 65 65 L175 65 Q190 65 190 80 Z" fill="#3B4758" />
+    
+    <!-- Paper Feed Slot -->
+    <rect x="70" y="72" width="100" height="8" rx="3" fill="#0F172A" />
+
+    <!-- Thermal Paper Rolling Out -->
+    <path d="M75 74 L75 30 Q75 25 80 25 L160 25 Q165 25 165 30 L165 74 Z" fill="url(#paperGrad)" stroke="#CBD5E0" stroke-width="1" />
+    
+    <!-- Paper Serrated Tear Edge -->
+    <path d="M75 25 L80 28 L85 25 L90 28 L95 25 L100 28 L105 25 L110 28 L115 25 L120 28 L125 25 L130 28 L135 25 L140 28 L145 25 L150 28 L155 25 L160 28 L165 25" stroke="#A0AEC0" stroke-width="1.2" fill="none" />
+
+    <!-- Printed Receipt Lines & Barcode -->
+    <line x1="85" y1="36" x2="155" y2="36" stroke="#4A5568" stroke-width="2" stroke-linecap="round" />
+    <line x1="85" y1="42" x2="135" y2="42" stroke="#718096" stroke-width="1.5" stroke-linecap="round" />
+    <line x1="85" y1="48" x2="145" y2="48" stroke="#718096" stroke-width="1.5" stroke-linecap="round" />
+    <!-- Barcode simulation -->
+    <rect x="85" y="54" width="2" height="12" fill="#2D3748" />
+    <rect x="89" y="54" width="4" height="12" fill="#2D3748" />
+    <rect x="95" y="54" width="1" height="12" fill="#2D3748" />
+    <rect x="98" y="54" width="3" height="12" fill="#2D3748" />
+    <rect x="103" y="54" width="2" height="12" fill="#2D3748" />
+    <rect x="107" y="54" width="5" height="12" fill="#2D3748" />
+    <rect x="114" y="54" width="1" height="12" fill="#2D3748" />
+    <rect x="117" y="54" width="3" height="12" fill="#2D3748" />
+    <rect x="122" y="54" width="2" height="12" fill="#2D3748" />
+    <rect x="126" y="54" width="4" height="12" fill="#2D3748" />
+
+    <!-- Front Panel Details -->
+    <rect x="62" y="95" width="116" height="42" rx="6" fill="#232B38" />
+
+    <!-- Feed & Power Buttons -->
+    <circle cx="78" cy="116" r="6" fill="#334155" stroke="#475569" stroke-width="1" />
+    <circle cx="95" cy="116" r="4" fill="#10B981" /> <!-- Green Power LED -->
+    <circle cx="107" cy="116" r="3" fill="#FFB200" /> <!-- Yellow Status LED -->
+    <circle cx="117" cy="116" r="3" fill="#EF4444" opacity="0.4" /> <!-- Error LED -->
+
+    <!-- Brand Emblem -->
+    <rect x="135" y="112" width="32" height="8" rx="2" fill="#0F172A" />
+    <text x="151" y="118" font-family="sans-serif" font-size="5" font-weight="bold" fill="#FFB200" text-anchor="middle">POS-80</text>
+  </g>
+</svg>

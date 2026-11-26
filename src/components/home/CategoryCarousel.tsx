@@ -22,18 +22,18 @@ import {
 import { OFFICIAL_CATEGORIES, CategoryItem } from "@/lib/categories";
 
 const iconMap: Record<string, React.ReactNode> = {
-  Laptop: <Laptop className="w-8 h-8 stroke-[1.4]" />,
-  Monitor: <Monitor className="w-8 h-8 stroke-[1.4]" />,
-  Printer: <Printer className="w-8 h-8 stroke-[1.4]" />,
-  Receipt: <Receipt className="w-8 h-8 stroke-[1.4]" />,
-  Projector: <Projector className="w-8 h-8 stroke-[1.4]" />,
-  Wifi: <Wifi className="w-8 h-8 stroke-[1.4]" />,
-  Radio: <Radio className="w-8 h-8 stroke-[1.4]" />,
-  Cable: <Cable className="w-8 h-8 stroke-[1.4]" />,
-  BatteryCharging: <BatteryCharging className="w-8 h-8 stroke-[1.4]" />,
-  Zap: <Zap className="w-8 h-8 stroke-[1.4]" />,
-  ScanBarcode: <ScanBarcode className="w-8 h-8 stroke-[1.4]" />,
-  Layers: <Layers className="w-8 h-8 stroke-[1.4]" />,
+  Laptop: <Laptop className="w-4 h-4 stroke-[1.6]" />,
+  Monitor: <Monitor className="w-4 h-4 stroke-[1.6]" />,
+  Printer: <Printer className="w-4 h-4 stroke-[1.6]" />,
+  Receipt: <Receipt className="w-4 h-4 stroke-[1.6]" />,
+  Projector: <Projector className="w-4 h-4 stroke-[1.6]" />,
+  Wifi: <Wifi className="w-4 h-4 stroke-[1.6]" />,
+  Radio: <Radio className="w-4 h-4 stroke-[1.6]" />,
+  Cable: <Cable className="w-4 h-4 stroke-[1.6]" />,
+  BatteryCharging: <BatteryCharging className="w-4 h-4 stroke-[1.6]" />,
+  Zap: <Zap className="w-4 h-4 stroke-[1.6]" />,
+  ScanBarcode: <ScanBarcode className="w-4 h-4 stroke-[1.6]" />,
+  Layers: <Layers className="w-4 h-4 stroke-[1.6]" />,
 };
 
 export function CategoryCarousel({
@@ -104,7 +104,7 @@ export function CategoryCarousel({
 
       {/* =========================================================================
           HORIZONTAL SCROLLABLE CAROUSEL CONTAINER (TOUCH + BUTTONS)
-          Renders all 11 major categories with smooth scroll and clean visual cards
+          Hybrid Visual: Relatable Hardware Photo + Floating Accent Icon Badge
          ========================================================================= */}
       <div
         ref={scrollRef}
@@ -112,36 +112,49 @@ export function CategoryCarousel({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {categories.map((cat) => {
-          const icon = iconMap[cat.iconName] || <Laptop className="w-8 h-8" />;
+          const icon = iconMap[cat.iconName] || <Laptop className="w-4 h-4" />;
           return (
             <Link
               key={cat.slug}
               href={`/shop?category=${cat.slug}`}
               prefetch={true}
-              className="group flex-shrink-0 w-[180px] sm:w-[200px] p-4 sm:p-5 bg-white border border-[#EBEBEB] hover:border-[#FFB200] rounded hover:shadow-md transition-all duration-200 flex flex-col items-center justify-between text-center relative"
+              className="group flex-shrink-0 w-[190px] sm:w-[210px] p-4 bg-white border border-[#EBEBEB] hover:border-[#FFB200] rounded hover:shadow-md transition-all duration-200 flex flex-col justify-between text-center relative overflow-hidden"
             >
-              {/* Optional Subtle Badge */}
-              {cat.badge && (
-                <div className="absolute top-2.5 right-2.5">
-                  <span className="text-[9px] font-extralight tracking-wider text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                    {cat.badge}
-                  </span>
-                </div>
-              )}
-
-              {/* Visual Presentation: High Quality Illustrated Icon with Glow */}
-              <div className="w-full h-24 sm:h-28 flex flex-col items-center justify-center mb-2">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-amber-50/70 via-slate-50 to-white border border-amber-100/60 flex items-center justify-center text-[#FFB200] group-hover:scale-110 group-hover:bg-amber-100/50 group-hover:text-amber-600 transition-all duration-300 shadow-2xs">
+              {/* Top Row: Floating Icon Badge (Left) + Quality Tag (Right) */}
+              <div className="flex items-center justify-between w-full mb-1 z-10">
+                {/* Floating Category Icon Badge */}
+                <div
+                  title={cat.name}
+                  className="w-7 h-7 rounded-full bg-white/95 backdrop-blur-xs border border-amber-200/80 shadow-2xs text-[#FFB200] flex items-center justify-center group-hover:scale-110 group-hover:bg-[#FFB200] group-hover:text-slate-950 transition-all duration-300"
+                >
                   {icon}
                 </div>
+
+                {/* Category Tag */}
+                {cat.badge && (
+                  <span className="text-[9px] font-extralight tracking-wider text-slate-500 bg-slate-50/90 px-2 py-0.5 rounded border border-slate-100">
+                    {cat.badge}
+                  </span>
+                )}
               </div>
 
-              {/* Category Name & Action Hint */}
-              <div className="w-full">
+              {/* Center: Real Relatable Product Photo Visual */}
+              <div className="w-full h-28 sm:h-32 flex items-center justify-center my-1 relative">
+                <div className="absolute inset-0 bg-radial from-slate-50/70 to-transparent rounded-lg pointer-events-none" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="max-h-24 sm:max-h-28 max-w-[85%] object-contain group-hover:scale-108 transition-transform duration-300 select-none drop-shadow-2xs"
+                />
+              </div>
+
+              {/* Bottom: Category Name & Shop Action */}
+              <div className="w-full pt-2 border-t border-slate-100/80">
                 <h3 className="text-xs sm:text-[13px] font-medium text-slate-800 group-hover:text-amber-600 transition-colors line-clamp-1">
                   {cat.name}
                 </h3>
-                <span className="text-[10px] font-light text-slate-400 group-hover:text-slate-600 mt-1 inline-flex items-center gap-1 transition-colors">
+                <span className="text-[10px] font-light text-slate-400 group-hover:text-slate-600 mt-0.5 inline-flex items-center gap-1 transition-colors">
                   Shop Collection &rarr;
                 </span>
               </div>
@@ -153,10 +166,10 @@ export function CategoryCarousel({
         <Link
           href="/shop"
           prefetch={true}
-          className="group flex-shrink-0 w-[180px] sm:w-[200px] p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center relative overflow-hidden"
+          className="group flex-shrink-0 w-[190px] sm:w-[210px] p-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center relative overflow-hidden"
         >
-          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-[#FFB200] mb-3 group-hover:scale-110 transition-transform">
-            <ArrowRight className="w-7 h-7 stroke-[1.8]" />
+          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#FFB200] mb-3 group-hover:scale-110 transition-transform">
+            <ArrowRight className="w-6 h-6 stroke-[1.8]" />
           </div>
           <h3 className="text-xs sm:text-sm font-medium tracking-wide uppercase">
             View All Shop
@@ -167,14 +180,14 @@ export function CategoryCarousel({
         </Link>
       </div>
 
-      {/* Mobile-Only "See All Categories" pill below carousel */}
+      {/* Mobile-Only "Browse All In Stock" pill below carousel */}
       <div className="sm:hidden text-center mt-3">
         <Link
           href="/shop"
           prefetch={true}
           className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-medium uppercase tracking-[0.16em] text-slate-700 bg-slate-50 border border-slate-200"
         >
-          <span>Browse All In Stock ({categories.length} Categories)</span>
+          <span>Browse All In Stock ({categories.length} Departments)</span>
           <ArrowRight className="w-3 h-3 text-[#FFB200]" />
         </Link>
       </div>

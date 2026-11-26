@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cableBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1D4ED8" />
+      <stop offset="50%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1E40AF" />
+    </linearGradient>
+    <linearGradient id="goldPins" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#EAB308" />
+    </linearGradient>
+    <filter id="cableShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.14" />
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="120" cy="155" rx="75" ry="12" fill="#E2E8F0" opacity="0.7" />
+
+  <!-- Coiled Cable Loops -->
+  <g filter="url(#cableShadow)">
+    <!-- Back Cable Loop -->
+    <path d="M60 120 C40 80, 70 45, 120 45 C170 45, 200 80, 180 120 C160 150, 80 150, 60 120 Z" fill="none" stroke="url(#cableBlue)" stroke-width="12" stroke-linecap="round" />
+    <!-- Inner Cable Loop -->
+    <path d="M75 115 C60 85, 85 60, 120 60 C155 60, 180 85, 165 115 C150 140, 90 140, 75 115 Z" fill="none" stroke="#2563EB" stroke-width="10" stroke-linecap="round" />
+
+    <!-- RJ45 Connector Plug (Foreground Left) -->
+    <g transform="translate(45, 75) rotate(-25)">
+      <!-- Strain Relief Boot -->
+      <path d="M0 25 L10 15 L25 15 L35 25 Z" fill="#1E3A8A" />
+      <!-- Clear Plastic Body -->
+      <rect x="25" y="10" width="38" height="22" rx="3" fill="#E2E8F0" opacity="0.9" stroke="#94A3B8" stroke-width="1.2" />
+      <!-- Locking Clip -->
+      <path d="M30 32 L48 40 L45 32 Z" fill="#CBD5E1" stroke="#64748B" stroke-width="1" />
+      <!-- 8 Gold-Plated Contacts -->
+      <rect x="52" y="12" width="9" height="2" fill="url(#goldPins)" />
+      <rect x="52" y="15" width="9" height="2" fill="url(#goldPins)" />
+      <rect x="52" y="18" width="9" height="2" fill="url(#goldPins)" />
+      <rect x="52" y="21" width="9" height="2" fill="url(#goldPins)" />
+      <rect x="52" y="24" width="9" height="2" fill="url(#goldPins)" />
+      <rect x="52" y="27" width="9" height="2" fill="url(#goldPins)" />
+    </g>
+
+    <!-- RJ45 Connector Plug (Foreground Right) -->
+    <g transform="translate(155, 95) rotate(15)">
+      <!-- Strain Relief Boot -->
+      <path d="M0 15 L10 5 L25 5 L35 15 Z" fill="#1E3A8A" />
+      <!-- Clear Plastic Body -->
+      <rect x="20" y="5" width="38" height="22" rx="3" fill="#E2E8F0" opacity="0.9" stroke="#94A3B8" stroke-width="1.2" />
+      <!-- Gold Pins -->
+      <rect x="48" y="7" width="8" height="18" rx="1" fill="url(#goldPins)" />
+    </g>
+  </g>
+
+  <!-- Category Spec Badge -->
+  <rect x="88" y="95" width="64" height="16" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+  <text x="120" y="106" font-family="sans-serif" font-size="8" font-weight="bold" fill="#1D4ED8" text-anchor="middle">CAT6 UTP 10G</text>
+</svg>
