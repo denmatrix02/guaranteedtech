@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Image from "next/image";
 import {
   Plus,
@@ -21,6 +21,11 @@ import {
   Facebook,
   Camera,
   Layers,
+  Upload,
+  UploadCloud,
+  RefreshCw,
+  Download,
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface BannerItem {
@@ -79,6 +84,15 @@ export function PostsManagerClient({
   const [displayOrder, setDisplayOrder] = useState(1);
   const [isPublished, setIsPublished] = useState(true);
 
+  // Media Upload & Meta Fetch State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isFetchingMeta, setIsFetchingMeta] = useState(false);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [fetchNotice, setFetchNotice] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   // Status & Feedback
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -87,6 +101,194 @@ export function PostsManagerClient({
   const showToast = (msg: string) => {
     setSuccessToast(msg);
     setTimeout(() => setSuccessToast(""), 4000);
+  };
+
+  // Handle direct image file upload
+  const handleImageUpload = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    setIsUploadingImage(true);
+    setErrorMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to upload image.");
+      }
+
+      const newUrl = data.urls?.[0];
+      if (newUrl) {
+        setImageUrl(newUrl);
+        showToast("Image uploaded successfully!");
+      }
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setErrorMessage(err.message || "Failed to upload image.");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Handle auto-fetching Facebook metadata & image
+  const handleFetchFacebookMeta = async (overrideUrl?: string) => {
+    const urlToFetch = overrideUrl || targetUrl;
+    if (!urlToFetch || !urlToFetch.trim()) {
+      setErrorMessage("Please enter a valid Facebook URL to fetch.");
+      return;
+    }
+
+    setIsFetchingMeta(true);
+    setErrorMessage("");
+    setFetchNotice(null);
+
+    try {
+      const res = await fetch("/api/admin/posts/fetch-meta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urlToFetch.trim() }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Could not fetch Facebook preview.");
+      }
+
+      const { title: fetchedTitle, subtitle: fetchedSub, imageUrl: fetchedImg } = result.data;
+
+      if (fetchedImg) {
+        setImageUrl(fetchedImg);
+      }
+      if (fetchedTitle && (!title || title.trim().length === 0 || title.includes("Best Business Laptops"))) {
+        setTitle(fetchedTitle);
+      }
+      if (fetchedSub && (!subtitle || subtitle.trim().length === 0)) {
+        setSubtitle(fetchedSub);
+      }
+
+      setFetchNotice("Successfully extracted image & details from Facebook!");
+      showToast("Facebook preview & image loaded!");
+      setTimeout(() => setFetchNotice(null), 4000);
+    } catch (err: any) {
+      console.error("Meta fetch error:", err);
+      setErrorMessage(err.message || "Failed to fetch Facebook metadata.");
+    } finally {
+      setIsFetchingMeta(false);
+    }
+  };
+
+  // Sync single post from Facebook
+  const handleSyncSinglePostFromFacebook = async (post: BannerItem) => {
+    if (!post.targetUrl) return;
+    setSyncingId(post.id);
+
+    try {
+      const res = await fetch("/api/admin/posts/fetch-meta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: post.targetUrl }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Could not fetch Facebook post metadata.");
+      }
+
+      const { title: fetchedTitle, subtitle: fetchedSub, imageUrl: fetchedImg } = result.data;
+
+      const updateRes = await fetch("/api/admin/posts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: post.id,
+          title: fetchedTitle || post.title,
+          subtitle: fetchedSub || post.subtitle,
+          imageUrl: fetchedImg || post.imageUrl,
+          targetUrl: post.targetUrl,
+          badgeText: post.badgeText,
+          displayOrder: post.displayOrder,
+          isPublished: post.isPublished,
+        }),
+      });
+
+      const updateData = await updateRes.json();
+      if (!updateRes.ok || !updateData.success) {
+        throw new Error(updateData.error || "Failed to save updated post.");
+      }
+
+      setFacebookPosts((prev) =>
+        prev.map((item) => (item.id === post.id ? updateData.post : item))
+      );
+
+      showToast(`Post #${post.displayOrder} synced with Facebook!`);
+    } catch (err: any) {
+      console.error("Single post sync error:", err);
+      showToast(`Sync failed: ${err.message}`);
+    } finally {
+      setSyncingId(null);
+    }
+  };
+
+  // Sync all posts from Facebook
+  const handleSyncAllFacebookPosts = async () => {
+    if (facebookPosts.length === 0) return;
+    setIsSyncingAll(true);
+    let updatedCount = 0;
+
+    try {
+      for (const post of facebookPosts) {
+        if (!post.targetUrl || !post.targetUrl.includes("facebook.com")) continue;
+
+        try {
+          const res = await fetch("/api/admin/posts/fetch-meta", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: post.targetUrl }),
+          });
+
+          const result = await res.json();
+          if (result.success && result.data) {
+            const { title: fetchedTitle, subtitle: fetchedSub, imageUrl: fetchedImg } = result.data;
+            if (fetchedImg || fetchedTitle) {
+              const updateRes = await fetch("/api/admin/posts", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  id: post.id,
+                  title: fetchedTitle || post.title,
+                  subtitle: fetchedSub || post.subtitle,
+                  imageUrl: fetchedImg || post.imageUrl,
+                }),
+              });
+              const updateData = await updateRes.json();
+              if (updateData.success && updateData.post) {
+                setFacebookPosts((prev) =>
+                  prev.map((item) => (item.id === post.id ? updateData.post : item))
+                );
+                updatedCount++;
+              }
+            }
+          }
+        } catch (itemErr) {
+          console.warn(`Sync failed for post ${post.id}:`, itemErr);
+        }
+      }
+
+      showToast(`Successfully refreshed ${updatedCount} Facebook post(s) to homepage!`);
+    } catch (err: any) {
+      console.error("Bulk sync error:", err);
+      showToast("Bulk sync encountered an error.");
+    } finally {
+      setIsSyncingAll(false);
+    }
   };
 
   // Open Create Modal
@@ -341,14 +543,29 @@ export function PostsManagerClient({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenCreateModal}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-[#FFB200] hover:bg-[#FFA500] text-white text-xs font-medium uppercase tracking-wider transition-colors shadow-xs"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New {activeTab === "facebook" ? "Facebook Post" : "Instagram Card"}</span>
-        </button>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {activeTab === "facebook" && (
+            <button
+              type="button"
+              disabled={isSyncingAll}
+              onClick={handleSyncAllFacebookPosts}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium uppercase tracking-wider transition-colors border border-blue-200 cursor-pointer disabled:opacity-50"
+              title="Automatically re-fetch and update all Facebook post images and texts to the CMS"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingAll ? "animate-spin" : ""}`} />
+              <span>{isSyncingAll ? "Syncing Feed..." : "Auto-Sync All from Facebook"}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-[#FFB200] hover:bg-[#FFA500] text-slate-950 text-xs font-medium uppercase tracking-wider transition-colors shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New {activeTab === "facebook" ? "Facebook Post" : "Instagram Card"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
@@ -509,6 +726,19 @@ export function PostsManagerClient({
                     </button>
                   </div>
 
+                  {/* Auto-Fetch from Facebook (if facebook) */}
+                  {activeTab === "facebook" && (
+                    <button
+                      type="button"
+                      disabled={syncingId === item.id}
+                      onClick={() => handleSyncSinglePostFromFacebook(item)}
+                      title="Auto-fetch and update image & details from Facebook"
+                      className="p-2 rounded border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${syncingId === item.id ? "animate-spin" : ""}`} />
+                    </button>
+                  )}
+
                   {/* Toggle Visibility */}
                   <button
                     type="button"
@@ -624,43 +854,165 @@ export function PostsManagerClient({
                 <label className="block text-xs font-medium text-slate-700 mb-1">
                   Direct {activeTab === "facebook" ? "Facebook" : "Instagram"} Link *
                 </label>
-                <input
-                  type="url"
-                  required
-                  value={targetUrl}
-                  onChange={(e) => setTargetUrl(e.target.value)}
-                  placeholder={
-                    activeTab === "facebook"
-                      ? "https://www.facebook.com/share/1VKj3gkgd2/?mibextid=wwXIfr"
-                      : "https://www.instagram.com/guaranteed_tech/ or https://www.instagram.com/p/..."
-                  }
-                  className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-light text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    required
+                    value={targetUrl}
+                    onChange={(e) => setTargetUrl(e.target.value)}
+                    placeholder={
+                      activeTab === "facebook"
+                        ? "https://www.facebook.com/share/1VKj3gkgd2/?mibextid=wwXIfr"
+                        : "https://www.instagram.com/guaranteed_tech/ or https://www.instagram.com/p/..."
+                    }
+                    className="flex-1 bg-white border border-slate-300 rounded px-3 py-2 text-xs font-light text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                  {activeTab === "facebook" && (
+                    <button
+                      type="button"
+                      disabled={isFetchingMeta}
+                      onClick={() => handleFetchFacebookMeta()}
+                      className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
+                      title="Fetch title, summary & image directly from this Facebook post"
+                    >
+                      {isFetchingMeta ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Fetching...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Auto-Fetch from Facebook</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
                 <p className="text-[11px] font-extralight text-slate-400 mt-1">
                   When visitors click this card on the homepage, they will be taken directly to this {activeTab === "facebook" ? "Facebook" : "Instagram"} post.
                 </p>
+                {fetchNotice && (
+                  <p className="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" /> {fetchNotice}
+                  </p>
+                )}
               </div>
 
-              {/* Image URL & Preset Selection */}
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Image URL / Asset Path *
-                </label>
+              {/* Image URL & Direct Device Upload */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-medium text-slate-700">
+                    Post Image / Banner Photo *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1 cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload from Computer/Phone</span>
+                  </button>
+                </div>
+
+                {/* Hidden File Input */}
                 <input
-                  type="text"
-                  required
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="/images/ui/..."
-                  className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-light text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleImageUpload(e.target.files);
+                    }
+                  }}
                 />
 
+                {/* Drag & Drop Upload Zone */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(false);
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                      handleImageUpload(e.dataTransfer.files);
+                    }
+                  }}
+                  className={`p-3.5 rounded border-2 border-dashed transition-all flex flex-col sm:flex-row items-center justify-between gap-3 ${
+                    isDragOver
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-slate-300 bg-slate-50/60 hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded bg-white border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center relative shadow-2xs">
+                      {imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imageUrl} alt="Current selection" className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-6 h-6 text-slate-300" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-xs font-medium text-slate-800 block">
+                        {imageUrl ? "Current Selected Post Image" : "No image selected"}
+                      </span>
+                      <span className="text-[11px] text-slate-400 block font-mono truncate max-w-xs sm:max-w-sm">
+                        {imageUrl || "Click upload, auto-fetch from Facebook, or select preset"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isUploadingImage}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-[#FFB200] hover:bg-[#FFA500] text-slate-950 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
+                    >
+                      {isUploadingImage ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Upload Image</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Text URL Input */}
+                <div>
+                  <span className="text-[10px] uppercase font-light text-slate-400 block mb-1">
+                    Or Enter Image URL / Asset Path Manually:
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://... or /uploads/posts/... or /images/ui/..."
+                    className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-light text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                </div>
+
                 {/* Quick Presets */}
-                <div className="mt-2">
+                <div className="mt-1">
                   <span className="text-[10px] uppercase font-light text-slate-400 block mb-1">
                     Quick Sample Presets:
                   </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {(activeTab === "facebook" ? SAMPLE_FACEBOOK_IMAGES : SAMPLE_INSTAGRAM_IMAGES).map(
                       (sample, idx) => (
                         <button
