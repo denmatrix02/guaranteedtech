@@ -103,16 +103,70 @@ export function PostsManagerClient({
     setTimeout(() => setSuccessToast(""), 4000);
   };
 
+  // Fast client-side image optimizer to keep uploads fast and avoid serverless payload limits
+  const compressImageClient = async (file: File): Promise<File> => {
+    if (!file.type.startsWith("image/") || file.size < 800 * 1024) {
+      return file;
+    }
+    return new Promise((resolve) => {
+      const img = document.createElement("img");
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const MAX_DIM = 1920;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || blob.size >= file.size) {
+              resolve(file);
+              return;
+            }
+            const optimizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".webp"), {
+              type: "image/webp",
+            });
+            resolve(optimizedFile);
+          },
+          "image/webp",
+          0.85
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+      img.src = objectUrl;
+    });
+  };
+
   // Handle direct image file upload
   const handleImageUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
-    const file = files[0];
+    const rawFile = files[0];
     setIsUploadingImage(true);
     setErrorMessage("");
 
     try {
+      const optimized = await compressImageClient(rawFile);
       const formData = new FormData();
-      formData.append("files", file);
+      formData.append("files", optimized);
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",

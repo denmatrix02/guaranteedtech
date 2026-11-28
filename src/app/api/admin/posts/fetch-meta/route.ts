@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
@@ -44,7 +47,6 @@ export async function POST(req: Request) {
 
     // Helper regex to extract meta property/name contents
     const extractMeta = (property: string): string | null => {
-      // standard order: <meta property="og:..." content="..." />
       const regex1 = new RegExp(
         `<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']+)["']`,
         "i"
@@ -52,7 +54,6 @@ export async function POST(req: Request) {
       const match1 = html.match(regex1);
       if (match1 && match1[1]) return match1[1];
 
-      // reverse order: <meta content="..." property="og:..." />
       const regex2 = new RegExp(
         `<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${property}["']`,
         "i"
@@ -109,7 +110,7 @@ export async function POST(req: Request) {
 
     let finalImageUrl = rawImageUrl || "";
 
-    // Save a permanent local copy of the image to /public/uploads/posts
+    // Save image to serverless database storage (MediaItem) so it never breaks on Vercel
     if (rawImageUrl && rawImageUrl.startsWith("http")) {
       try {
         const imgRes = await fetch(rawImageUrl, {
@@ -129,15 +130,33 @@ export async function POST(req: Request) {
           const arrayBuf = await imgRes.arrayBuffer();
           const buffer = Buffer.from(arrayBuf);
 
-          const uploadDir = path.join(process.cwd(), "public", "uploads", "posts");
-          await mkdir(uploadDir, { recursive: true });
+          const base64Data = `data:${contentType};base64,${buffer.toString("base64")}`;
+          const mediaItem = await prisma.mediaItem.create({
+            data: {
+              filename: `fb-${Date.now()}${ext}`,
+              originalName: "facebook-post.jpg",
+              mimeType: contentType,
+              fileSize: buffer.length,
+              url: base64Data,
+              folder: "posts",
+            },
+          });
 
-          const filename = `fb-${Date.now()}-${Math.floor(Math.random() * 1000)}${ext}`;
-          await writeFile(path.join(uploadDir, filename), buffer);
-          finalImageUrl = `/uploads/posts/${filename}`;
+          finalImageUrl = `/api/media/${mediaItem.id}`;
+
+          // Optional local disk cache in non-serverless dev (safe try-catch)
+          if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+            try {
+              const uploadDir = path.join(process.cwd(), "public", "uploads", "posts");
+              await mkdir(uploadDir, { recursive: true });
+              await writeFile(path.join(uploadDir, `fb-${Date.now()}${ext}`), buffer);
+            } catch {
+              // Ignore filesystem errors in serverless environments
+            }
+          }
         }
       } catch (imgErr) {
-        console.warn("Could not save local copy of Facebook image, falling back to raw image URL:", imgErr);
+        console.warn("Could not save copy to MediaItem, falling back to raw URL:", imgErr);
         finalImageUrl = rawImageUrl;
       }
     }
