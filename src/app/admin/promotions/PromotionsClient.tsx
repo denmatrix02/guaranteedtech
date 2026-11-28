@@ -198,12 +198,12 @@ export function PromotionsClient({ initialPromotions }: { initialPromotions: any
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-[10px] font-light uppercase tracking-[0.16em] text-slate-400 border-b border-slate-100">
               <tr>
-                <th className="py-3 px-4">Campaign Title</th>
-                <th className="py-3 px-4">Discount Value</th>
-                <th className="py-3 px-4">End Date / Countdown</th>
-                <th className="py-3 px-4">Action Button</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 whitespace-nowrap">Campaign Title</th>
+                <th className="py-3 px-4 whitespace-nowrap">Discount Value</th>
+                <th className="py-3 px-4 whitespace-nowrap">End Date / Countdown</th>
+                <th className="py-3 px-4 whitespace-nowrap">Action Button</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-light text-slate-700">
@@ -268,21 +268,21 @@ export function PromotionsClient({ initialPromotions }: { initialPromotions: any
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-2xs p-4">
-          <div className="bg-white rounded-lg border border-slate-200 w-full max-w-lg shadow-xl overflow-hidden animate-in fade-in zoom-in duration-150">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-2xs p-3 sm:p-4">
+          <div className="bg-white rounded-lg border border-slate-200 w-full max-w-lg shadow-xl overflow-hidden animate-in fade-in zoom-in duration-150 max-h-[92vh] flex flex-col">
+            <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <h3 className="text-sm font-normal uppercase tracking-wider text-slate-800">
                 {editingId ? "Edit Promotion" : "Create Storefront Promotion"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-700 text-lg font-bold"
+                className="text-slate-400 hover:text-slate-700 text-lg font-bold p-1"
               >
                 &times;
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto">
               <div>
                 <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1">
                   Campaign Title *

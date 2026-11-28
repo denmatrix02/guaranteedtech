@@ -156,7 +156,10 @@ export function SettingsClient({ initialSettings }: { initialSettings: Record<st
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 pt-2 rounded-t">
+      <div
+        className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 pt-2 rounded-t scroll-smooth"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         <button
           type="button"
           onClick={() => setActiveTab("general")}

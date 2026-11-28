@@ -165,13 +165,13 @@ export function InventoryClient({ initialProducts }: { initialProducts: any[] })
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-[10px] font-light uppercase tracking-[0.16em] text-slate-400 border-b border-slate-100">
               <tr>
-                <th className="py-3 px-4">Hardware System</th>
-                <th className="py-3 px-4">Azikiwe Rd Showroom</th>
-                <th className="py-3 px-4">Asa Rd Showroom</th>
-                <th className="py-3 px-4">Total Available</th>
-                <th className="py-3 px-4">Low-Stock Alert</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Quick Save</th>
+                <th className="py-3 px-4 whitespace-nowrap">Hardware System</th>
+                <th className="py-3 px-4 whitespace-nowrap">Azikiwe Rd Showroom</th>
+                <th className="py-3 px-4 whitespace-nowrap">Asa Rd Showroom</th>
+                <th className="py-3 px-4 whitespace-nowrap">Total Available</th>
+                <th className="py-3 px-4 whitespace-nowrap">Low-Stock Alert</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Quick Save</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-light text-slate-700">

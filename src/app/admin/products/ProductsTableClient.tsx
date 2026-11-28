@@ -287,7 +287,7 @@ export function ProductsTableClient({
         </div>
 
         {/* Filter Badges Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 border-t border-slate-100 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 pt-1 border-t border-slate-100 text-xs">
           {/* Category */}
           <select
             value={selectedCategory}
@@ -295,7 +295,7 @@ export function ProductsTableClient({
               setSelectedCategory(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
+            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
           >
             <option value="ALL">All Categories</option>
             {categories.map((c) => (
@@ -312,7 +312,7 @@ export function ProductsTableClient({
               setSelectedBrand(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
+            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
           >
             <option value="ALL">All Brands</option>
             {brands.map((b) => (
@@ -329,7 +329,7 @@ export function ProductsTableClient({
               setSelectedCondition(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
+            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
           >
             <option value="ALL">All Conditions</option>
             <option value="BRAND_NEW">Brand New</option>
@@ -344,7 +344,7 @@ export function ProductsTableClient({
               setSelectedStock(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
+            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
           >
             <option value="ALL">All Stock Statuses</option>
             <option value="IN_STOCK">In Stock (&gt; 4)</option>
@@ -359,7 +359,7 @@ export function ProductsTableClient({
               setSelectedStatus(e.target.value);
               setCurrentPage(1);
             }}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
+            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-[#FFB200]"
           >
             <option value="ALL">All Publishing</option>
             <option value="PUBLISHED">Published Only</option>
@@ -370,7 +370,7 @@ export function ProductsTableClient({
 
       {/* Bulk Action Bar (Visible when items selected) */}
       {selectedIds.length > 0 && (
-        <div className="bg-amber-50 border border-amber-300 p-3 rounded flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="bg-amber-50 border border-amber-300 p-3 rounded flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-slate-800 font-normal">
             <span className="w-5 h-5 rounded-full bg-[#FFB200] text-slate-950 flex items-center justify-center font-bold text-[10px]">
               {selectedIds.length}
@@ -378,12 +378,12 @@ export function ProductsTableClient({
             <span>products selected</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               disabled={isProcessing}
               onClick={() => handleBulkAction("publish")}
-              className="px-3 py-1.5 bg-white border border-slate-200 hover:border-emerald-500 text-emerald-700 rounded font-normal transition-colors"
+              className="flex-1 sm:flex-none px-3 py-1.5 bg-white border border-slate-200 hover:border-emerald-500 text-emerald-700 rounded font-normal transition-colors text-center"
             >
               Publish
             </button>
@@ -391,7 +391,7 @@ export function ProductsTableClient({
               type="button"
               disabled={isProcessing}
               onClick={() => handleBulkAction("unpublish")}
-              className="px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-700 rounded font-normal transition-colors"
+              className="flex-1 sm:flex-none px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-700 rounded font-normal transition-colors text-center"
             >
               Unpublish
             </button>
@@ -399,7 +399,7 @@ export function ProductsTableClient({
               type="button"
               disabled={isProcessing}
               onClick={() => handleBulkAction("archive")}
-              className="px-3 py-1.5 bg-white border border-slate-200 hover:border-amber-500 text-amber-700 rounded font-normal transition-colors"
+              className="flex-1 sm:flex-none px-3 py-1.5 bg-white border border-slate-200 hover:border-amber-500 text-amber-700 rounded font-normal transition-colors text-center"
             >
               Archive
             </button>
@@ -407,7 +407,7 @@ export function ProductsTableClient({
               type="button"
               disabled={isProcessing}
               onClick={() => handleBulkAction("delete")}
-              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded font-normal transition-colors"
+              className="flex-1 sm:flex-none px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded font-normal transition-colors text-center"
             >
               Delete
             </button>
@@ -421,7 +421,7 @@ export function ProductsTableClient({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-[10px] font-light uppercase tracking-[0.16em] text-slate-400 border-b border-slate-100">
               <tr>
-                <th className="py-3 px-3 w-8">
+                <th className="py-3 px-3 w-8 whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={
@@ -432,13 +432,13 @@ export function ProductsTableClient({
                     className="rounded border-slate-300 text-[#FFB200] focus:ring-[#FFB200]"
                   />
                 </th>
-                <th className="py-3 px-3">Product Details</th>
-                <th className="py-3 px-3">Brand &amp; Category</th>
-                <th className="py-3 px-3">Condition</th>
-                <th className="py-3 px-3">Selling Price (₦)</th>
-                <th className="py-3 px-3">Stock Level</th>
-                <th className="py-3 px-3">Visibility</th>
-                <th className="py-3 px-3 text-right">Actions</th>
+                <th className="py-3 px-3 whitespace-nowrap">Product Details</th>
+                <th className="py-3 px-3 whitespace-nowrap">Brand &amp; Category</th>
+                <th className="py-3 px-3 whitespace-nowrap">Condition</th>
+                <th className="py-3 px-3 whitespace-nowrap">Selling Price (₦)</th>
+                <th className="py-3 px-3 whitespace-nowrap">Stock Level</th>
+                <th className="py-3 px-3 whitespace-nowrap">Visibility</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-light text-slate-700">

@@ -162,12 +162,12 @@ export function PagesClient({ initialPages }: { initialPages: any[] }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-[10px] font-light uppercase tracking-[0.16em] text-slate-400 border-b border-slate-100">
               <tr>
-                <th className="py-3 px-4">Page Title</th>
-                <th className="py-3 px-4">Public URL Path</th>
-                <th className="py-3 px-4">Subtitle / Headline</th>
-                <th className="py-3 px-4">Last Updated</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 whitespace-nowrap">Page Title</th>
+                <th className="py-3 px-4 whitespace-nowrap">Public URL Path</th>
+                <th className="py-3 px-4 whitespace-nowrap">Subtitle / Headline</th>
+                <th className="py-3 px-4 whitespace-nowrap">Last Updated</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-light text-slate-700">

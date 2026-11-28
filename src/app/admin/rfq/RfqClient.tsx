@@ -116,13 +116,13 @@ export function RfqClient({ initialRfqs }: { initialRfqs: any[] }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-[10px] font-light uppercase tracking-[0.16em] text-slate-400 border-b border-slate-100">
               <tr>
-                <th className="py-3 px-4">RFQ Number</th>
-                <th className="py-3 px-4">Company &amp; Lead</th>
-                <th className="py-3 px-4">Requested Hardware</th>
-                <th className="py-3 px-4">Qty &amp; Budget</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 whitespace-nowrap">RFQ Number</th>
+                <th className="py-3 px-4 whitespace-nowrap">Company &amp; Lead</th>
+                <th className="py-3 px-4 whitespace-nowrap">Requested Hardware</th>
+                <th className="py-3 px-4 whitespace-nowrap">Qty &amp; Budget</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 whitespace-nowrap">Date</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-light text-slate-700">

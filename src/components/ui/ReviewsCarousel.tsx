@@ -25,12 +25,12 @@ export function ReviewsCarousel({ children }: ReviewsCarouselProps) {
   return (
     <div>
       {/* Hatched Header with Functional Carousel Arrows */}
-      <div className="flex items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-4 flex-1">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-4 mb-6 sm:mb-8">
+        <div className="flex items-center gap-2.5 sm:gap-4 flex-1 min-w-0">
           <h2 className="text-xs sm:text-sm font-light tracking-[0.22em] uppercase text-slate-800 whitespace-nowrap">
             CUSTOMERS REVIEWS
           </h2>
-          <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70"></div>
+          <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70 min-w-[20px]"></div>
         </div>
 
         <div className="flex items-center gap-1.5 flex-shrink-0">

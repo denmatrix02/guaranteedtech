@@ -390,14 +390,17 @@ export function ProductFormClient({
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 pt-2 rounded-t">
+      {/* Navigation Tabs (Smooth Touch Horizontal Scrolling on Mobile) */}
+      <div
+        className="flex items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 pt-2 rounded-t scroll-smooth"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs uppercase tracking-wider font-light whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs uppercase tracking-wider font-light whitespace-nowrap border-b-2 transition-colors cursor-pointer flex-shrink-0 ${
               activeTab === tab.id
                 ? "border-[#FFB200] text-slate-900 font-normal bg-amber-50/50"
                 : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
@@ -937,37 +940,45 @@ export function ProductFormClient({
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {specifications.map((spec, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={spec.category}
-                    onChange={(e) => handleSpecChange(idx, "category", e.target.value)}
-                    placeholder="Group (e.g. DISPLAY)"
-                    className="w-32 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 uppercase"
-                  />
-                  <input
-                    type="text"
-                    value={spec.name}
-                    onChange={(e) => handleSpecChange(idx, "name", e.target.value)}
-                    placeholder="Spec Name (e.g. RAM)"
-                    className="w-48 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800"
-                  />
-                  <input
-                    type="text"
-                    value={spec.value}
-                    onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
-                    placeholder="Value (e.g. 16GB DDR5 4800MHz)"
-                    className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSpecRow(idx)}
-                    className="p-1.5 text-slate-400 hover:text-red-600 rounded transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div
+                  key={idx}
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 sm:p-0 bg-slate-50/70 sm:bg-transparent rounded sm:rounded-none border sm:border-0 border-slate-200"
+                >
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <input
+                      type="text"
+                      value={spec.category}
+                      onChange={(e) => handleSpecChange(idx, "category", e.target.value)}
+                      placeholder="Group (e.g. DISPLAY)"
+                      className="w-full sm:w-32 px-3 py-1.5 bg-white sm:bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 uppercase"
+                    />
+                    <input
+                      type="text"
+                      value={spec.name}
+                      onChange={(e) => handleSpecChange(idx, "name", e.target.value)}
+                      placeholder="Spec Name (e.g. RAM)"
+                      className="w-full sm:w-48 px-3 py-1.5 bg-white sm:bg-slate-50 border border-slate-200 rounded text-xs text-slate-800"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 flex-1 w-full">
+                    <input
+                      type="text"
+                      value={spec.value}
+                      onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
+                      placeholder="Value (e.g. 16GB DDR5 4800MHz)"
+                      className="flex-1 w-full px-3 py-1.5 bg-white sm:bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 min-w-0"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSpecRow(idx)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 rounded transition-colors flex-shrink-0"
+                      title="Remove spec row"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

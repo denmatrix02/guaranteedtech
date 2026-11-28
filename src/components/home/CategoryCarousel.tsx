@@ -61,13 +61,13 @@ export function CategoryCarousel({
           HATCHED SECTION HEADER WITH INTERACTIVE SIDE-TO-SIDE SCROLL CONTROLS
           Matches the reference UI with "SEE ALL" link and [<] [>] buttons
          ========================================================================= */}
-      <div className="flex items-center justify-between gap-3 sm:gap-4 mb-8">
-        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-4 mb-6 sm:mb-8">
+        <div className="flex items-center gap-2.5 sm:gap-4 flex-1 min-w-0">
           <h2 className="text-xs sm:text-sm font-light tracking-[0.22em] uppercase text-slate-800 whitespace-nowrap">
             CATEGORIES
           </h2>
           {/* Hatched Line /////////////////////////////////////////// */}
-          <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70"></div>
+          <div className="flex-1 h-3 bg-[repeating-linear-gradient(45deg,#E2E8F0,#E2E8F0_1px,transparent_1px,transparent_4px)] opacity-70 min-w-[20px]"></div>
         </div>
 
         {/* Action Controls: SEE ALL + Side-to-Side Chevron Buttons */}
@@ -108,7 +108,7 @@ export function CategoryCarousel({
          ========================================================================= */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 px-1 -mx-1"
+        className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 px-1 -mx-1"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {categories.map((cat) => {
@@ -118,7 +118,7 @@ export function CategoryCarousel({
               key={cat.slug}
               href={`/shop?category=${cat.slug}`}
               prefetch={true}
-              className="group flex-shrink-0 w-[190px] sm:w-[210px] p-4 bg-white border border-[#EBEBEB] hover:border-[#FFB200] rounded hover:shadow-md transition-all duration-200 flex flex-col justify-between text-center relative overflow-hidden"
+              className="group flex-shrink-0 w-[175px] sm:w-[205px] p-3.5 sm:p-4 bg-white border border-[#EBEBEB] hover:border-[#FFB200] rounded hover:shadow-md transition-all duration-200 flex flex-col justify-between text-center relative overflow-hidden"
             >
               {/* Top Row: Floating Icon Badge (Left) + Quality Tag (Right) */}
               <div className="flex items-center justify-between w-full mb-1 z-10">
@@ -132,29 +132,29 @@ export function CategoryCarousel({
 
                 {/* Category Tag */}
                 {cat.badge && (
-                  <span className="text-[9px] font-extralight tracking-wider text-slate-500 bg-slate-50/90 px-2 py-0.5 rounded border border-slate-100">
+                  <span className="text-[9px] font-extralight tracking-wider text-slate-500 bg-slate-50/90 px-2 py-0.5 rounded border border-slate-100 truncate max-w-[100px]">
                     {cat.badge}
                   </span>
                 )}
               </div>
 
               {/* Center: Real Relatable Product Photo Visual */}
-              <div className="w-full h-28 sm:h-32 flex items-center justify-center my-1 relative">
+              <div className="w-full h-24 sm:h-28 flex items-center justify-center my-1 relative">
                 <div className="absolute inset-0 bg-radial from-slate-50/70 to-transparent rounded-lg pointer-events-none" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="max-h-24 sm:max-h-28 max-w-[85%] object-contain group-hover:scale-108 transition-transform duration-300 select-none drop-shadow-2xs"
+                  className="max-h-20 sm:max-h-24 max-w-[85%] object-contain group-hover:scale-108 transition-transform duration-300 select-none drop-shadow-2xs"
                 />
               </div>
 
-              {/* Bottom: Category Name & Shop Action (1:1 matching Best Selling Items typography: text-xs font-light text-slate-700) */}
+              {/* Bottom: Category Name & Shop Action (Exact 1:1 matching Best Selling Items typography: text-xs font-light text-slate-700) */}
               <div className="w-full pt-2 border-t border-slate-100/80">
-                <h3 className="text-xs font-light text-slate-700 group-hover:text-amber-600 transition-colors line-clamp-1">
+                <h3 className="text-xs font-light text-slate-700 group-hover:text-amber-600 transition-colors line-clamp-2 min-h-[32px] flex items-center justify-center leading-tight">
                   {cat.name}
                 </h3>
-                <span className="text-[10px] font-light text-slate-400 group-hover:text-slate-600 mt-0.5 inline-flex items-center gap-1 transition-colors">
+                <span className="text-[10px] font-light text-slate-400 group-hover:text-slate-600 mt-1 inline-flex items-center gap-1 transition-colors">
                   Shop Collection &rarr;
                 </span>
               </div>
@@ -166,10 +166,10 @@ export function CategoryCarousel({
         <Link
           href="/shop"
           prefetch={true}
-          className="group flex-shrink-0 w-[190px] sm:w-[210px] p-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center relative overflow-hidden"
+          className="group flex-shrink-0 w-[175px] sm:w-[205px] p-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded hover:shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center relative overflow-hidden"
         >
-          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#FFB200] mb-3 group-hover:scale-110 transition-transform">
-            <ArrowRight className="w-6 h-6 stroke-[1.8]" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#FFB200] mb-3 group-hover:scale-110 transition-transform">
+            <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.8]" />
           </div>
           <h3 className="text-xs font-light tracking-wide uppercase text-slate-200">
             View All Shop

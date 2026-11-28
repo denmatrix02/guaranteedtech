@@ -468,30 +468,30 @@ export default async function HomePage() {
 
             {/* Right Campaign Headline, Countdown, Button */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-normal text-slate-800 tracking-tight leading-tight uppercase whitespace-pre-line">
+              <h2 className="text-xl sm:text-2xl lg:text-4xl font-normal text-slate-800 tracking-tight leading-snug sm:leading-tight uppercase break-words">
                 {promoTitle}
               </h2>
 
-              {/* Countdown Timer */}
-              <div className="flex items-center justify-center lg:justify-start gap-4">
+              {/* Responsive Countdown Timer */}
+              <div className="flex items-center justify-center lg:justify-start gap-2.5 sm:gap-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoDays}</span>
-                  <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Days</span>
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-800">{promoDays}</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Days</span>
                 </div>
-                <span className="text-xl font-extralight text-slate-300 -mt-3">:</span>
+                <span className="text-lg sm:text-xl font-extralight text-slate-300 -mt-2.5 sm:-mt-3">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoHours}</span>
-                  <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Hours</span>
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-800">{promoHours}</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Hours</span>
                 </div>
-                <span className="text-xl font-extralight text-slate-300 -mt-3">:</span>
+                <span className="text-lg sm:text-xl font-extralight text-slate-300 -mt-2.5 sm:-mt-3">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoMins}</span>
-                  <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Mins</span>
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-800">{promoMins}</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Mins</span>
                 </div>
-                <span className="text-xl font-extralight text-slate-300 -mt-3">:</span>
+                <span className="text-lg sm:text-xl font-extralight text-slate-300 -mt-2.5 sm:-mt-3">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoSecs}</span>
-                  <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Secs</span>
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-800">{promoSecs}</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Secs</span>
                 </div>
               </div>
 
@@ -499,7 +499,7 @@ export default async function HomePage() {
                 <Link
                   href={promoCtaUrl}
                   prefetch={true}
-                  className="inline-block bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-[0.16em] px-8 py-3 rounded-full shadow-xs transition-colors"
+                  className="inline-block bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-[0.16em] px-7 sm:px-8 py-2.5 sm:py-3 rounded-full shadow-xs transition-colors"
                 >
                   {promoCtaLabel}
                 </Link>

@@ -126,7 +126,7 @@ export function Navbar() {
             </nav>
 
             {/* Right Action Icons: Search, User, Wishlist, Cart (Flush with Right Container Grid) */}
-            <div className="flex items-center gap-5 text-slate-700 flex-shrink-0">
+            <div className="flex items-center gap-3 sm:gap-5 text-slate-700 flex-shrink-0">
               {/* Search Icon */}
               <button
                 type="button"
