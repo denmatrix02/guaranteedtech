@@ -44,6 +44,8 @@ export function ProductFormClient({
   const [slug, setSlug] = useState(initialProduct?.slug || "");
   const [sku, setSku] = useState(initialProduct?.sku || "");
   const [brandId, setBrandId] = useState(initialProduct?.brandId || brands[0]?.id || "");
+  const [customBrandName, setCustomBrandName] = useState("");
+  const [isCustomBrand, setIsCustomBrand] = useState(false);
   const [categoryId, setCategoryId] = useState(initialProduct?.categoryId || categories[0]?.id || "");
   const [series, setSeries] = useState(initialProduct?.series || "");
   const [modelNumber, setModelNumber] = useState(initialProduct?.modelNumber || "");
@@ -255,8 +257,9 @@ export function ProductFormClient({
     setIsSubmitting(true);
 
     try {
-      if (!name || !sku || !brandId || !categoryId || !basePrice) {
-        throw new Error("Please complete the required basic details and selling price.");
+      const hasBrand = isCustomBrand ? Boolean(customBrandName.trim()) : Boolean(brandId);
+      if (!name || !sku || !hasBrand || !categoryId || !basePrice) {
+        throw new Error("Please complete the required basic details, Brand (select or custom), and selling price.");
       }
 
       const totalBranch = (parseInt(azikiweStock, 10) || 0) + (parseInt(asaRoadStock, 10) || 0);
@@ -267,7 +270,8 @@ export function ProductFormClient({
         subtitle,
         slug: slug || undefined,
         sku,
-        brandId,
+        brandId: isCustomBrand ? "CUSTOM" : brandId,
+        customBrandName: isCustomBrand ? customBrandName.trim() : undefined,
         categoryId,
         series,
         modelNumber,
@@ -480,24 +484,94 @@ export function ProductFormClient({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+            {/* 1. Brand Selection with Custom / Others Input Option */}
             <div>
-              <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1.5">
-                Brand *
+              <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1.5 flex items-center justify-between">
+                <span>Brand *</span>
+                <span className="text-[9px] font-normal text-amber-600 lowercase tracking-normal">
+                  {isCustomBrand ? "custom mode" : "standard list"}
+                </span>
               </label>
               <select
-                value={brandId}
-                onChange={(e) => setBrandId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-[#FFB200]"
+                value={isCustomBrand ? "CUSTOM" : brandId}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "CUSTOM") {
+                    setIsCustomBrand(true);
+                    setBrandId("CUSTOM");
+                  } else {
+                    setIsCustomBrand(false);
+                    setBrandId(val);
+                    setCustomBrandName("");
+                  }
+                }}
+                className={`w-full px-3.5 py-2.5 border rounded text-xs text-slate-800 focus:outline-none focus:border-[#FFB200] transition-colors ${
+                  isCustomBrand
+                    ? "bg-amber-50 border-amber-300 font-medium text-amber-900"
+                    : "bg-slate-50 border-slate-200"
+                }`}
               >
-                {brands.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
+                <optgroup label="Catalog Brands (Select One)">
+                  {brands.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Custom / Other Brand">
+                  <option value="CUSTOM">
+                    ✨ + Other / Custom Brand (Write Custom Name)...
                   </option>
-                ))}
+                </optgroup>
               </select>
+
+              {/* Custom Brand Name Input & Quick Hardware Chips */}
+              {isCustomBrand && (
+                <div className="mt-2 p-2.5 bg-amber-50/90 border border-amber-300 rounded space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[9px] font-semibold uppercase tracking-wider text-amber-900">
+                      Write Brand Name *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomBrand(false);
+                        setBrandId(brands[0]?.id || "");
+                        setCustomBrandName("");
+                      }}
+                      className="text-[9px] text-slate-500 hover:text-slate-800 underline"
+                    >
+                      Use preset list
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required={isCustomBrand}
+                    value={customBrandName}
+                    onChange={(e) => setCustomBrandName(e.target.value)}
+                    placeholder="e.g. Starlink, Cisco, MikroTik, Ubiquiti, Epson..."
+                    className="w-full px-2.5 py-1.5 bg-white border border-amber-300 rounded text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+                    autoFocus
+                  />
+                  <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                    <span className="text-[8px] uppercase tracking-wider text-amber-800 font-medium">Quick:</span>
+                    {["Starlink", "Cisco", "MikroTik", "Ubiquiti", "TP-Link", "D-Link", "Epson", "Mercury", "Schneider", "Anker", "APC"].map((quick) => (
+                      <button
+                        key={quick}
+                        type="button"
+                        onClick={() => setCustomBrandName(quick)}
+                        className="px-1.5 py-0.5 rounded text-[9px] font-light bg-white border border-amber-200 text-slate-700 hover:bg-amber-100 transition-colors"
+                      >
+                        {quick}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* 2. Category / Department */}
             <div>
               <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1.5">
                 Department / Category *
@@ -515,6 +589,21 @@ export function ProductFormClient({
               </select>
             </div>
 
+            {/* 3. Sub-Category / Hardware Series (e.g. Starlink Standard Kit, ThinkPad T-Series) */}
+            <div>
+              <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1.5">
+                Sub-Category / Series
+              </label>
+              <input
+                type="text"
+                value={series}
+                onChange={(e) => setSeries(e.target.value)}
+                placeholder="e.g. Starlink Kit, ThinkPad, EliteBook"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-[#FFB200]"
+              />
+            </div>
+
+            {/* 4. Hardware Condition */}
             <div>
               <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1.5">
                 Hardware Condition *
@@ -530,15 +619,16 @@ export function ProductFormClient({
               </select>
             </div>
 
+            {/* 5. Model Number */}
             <div>
               <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1.5">
-                Model / Series
+                Model Number
               </label>
               <input
                 type="text"
                 value={modelNumber}
                 onChange={(e) => setModelNumber(e.target.value)}
-                placeholder="e.g. 21HD001QUS"
+                placeholder="e.g. UTA-231, 21HD001QUS"
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-[#FFB200]"
               />
             </div>

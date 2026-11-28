@@ -43,6 +43,7 @@ export async function PUT(
       slug,
       sku,
       brandId,
+      customBrandName,
       categoryId,
       series,
       modelNumber,
@@ -84,6 +85,33 @@ export async function PUT(
       branchStock,
     } = body;
 
+    // Resolve Brand: Support dynamic on-the-fly custom brand creation
+    let resolvedBrandId = brandId;
+    if ((brandId === "CUSTOM" || !brandId || brandId === "OTHER") && customBrandName && typeof customBrandName === "string" && customBrandName.trim().length > 0) {
+      const trimmedBrand = customBrandName.trim();
+      const brandSlug = trimmedBrand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+      let matchedBrand = await prisma.brand.findFirst({
+        where: {
+          OR: [
+            { name: { equals: trimmedBrand, mode: "insensitive" } },
+            { slug: brandSlug },
+          ],
+        },
+      });
+
+      if (!matchedBrand) {
+        matchedBrand = await prisma.brand.create({
+          data: {
+            name: trimmedBrand,
+            slug: brandSlug || `brand-${Date.now()}`,
+            isPublished: true,
+          },
+        });
+      }
+      resolvedBrandId = matchedBrand.id;
+    }
+
     const parsedPrice = parseFloat(basePrice);
     const parsedCompare = comparePrice ? parseFloat(comparePrice) : null;
     const parsedCost = costPrice ? parseFloat(costPrice) : null;
@@ -106,7 +134,7 @@ export async function PUT(
         subtitle: subtitle !== undefined ? subtitle : undefined,
         slug: slug || undefined,
         sku,
-        brandId,
+        brandId: resolvedBrandId || brandId,
         categoryId,
         series: series !== undefined ? series : undefined,
         modelNumber: modelNumber !== undefined ? modelNumber : undefined,

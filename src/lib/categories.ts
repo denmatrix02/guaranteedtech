@@ -406,9 +406,11 @@ export function getCategoryFilterConfig(categorySlug?: string | null): CategoryF
     case "routers":
       return {
         brands: [
+          { name: "Starlink", slug: "starlink" },
           { name: "TP-Link", slug: "tp-link" },
           { name: "Cisco", slug: "cisco" },
           { name: "MikroTik", slug: "mikrotik" },
+          { name: "Ubiquiti", slug: "ubiquiti" },
           { name: "D-Link", slug: "d-link" },
           { name: "Netgear", slug: "netgear" },
           { name: "Huawei", slug: "huawei" },

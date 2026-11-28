@@ -103,7 +103,23 @@ export async function executeIntelligentSearch(
  * Tokenize search query to extract hardware specifications, brands, and usage
  */
 function parseSearchTokens(query: string) {
-  const brands = ["hp", "lenovo", "dell", "apple", "asus", "logitech", "samsung", "apc", "anker", "canon"];
+  const brands = [
+    "hp",
+    "lenovo",
+    "dell",
+    "apple",
+    "asus",
+    "logitech",
+    "samsung",
+    "apc",
+    "anker",
+    "canon",
+    "starlink",
+    "cisco",
+    "mikrotik",
+    "ubiquiti",
+    "tp-link",
+  ];
   const seriesList = ["thinkpad", "elitebook", "probook", "latitude", "macbook", "zenbook", "optiplex", "rog"];
   const usages = ["programming", "gaming", "business", "student", "graphic design", "office", "workstation"];
 

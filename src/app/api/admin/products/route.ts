@@ -106,6 +106,7 @@ export async function POST(request: Request) {
       slug: customSlug,
       sku,
       brandId,
+      customBrandName,
       categoryId,
       series,
       modelNumber,
@@ -146,9 +147,36 @@ export async function POST(request: Request) {
       branchStock = [],
     } = body;
 
-    if (!name || !sku || !brandId || !categoryId || basePrice === undefined || basePrice === null) {
+    // Resolve Brand: Support dynamic on-the-fly custom brand creation
+    let resolvedBrandId = brandId;
+    if ((brandId === "CUSTOM" || !brandId || brandId === "OTHER") && customBrandName && typeof customBrandName === "string" && customBrandName.trim().length > 0) {
+      const trimmedBrand = customBrandName.trim();
+      const brandSlug = trimmedBrand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+      let matchedBrand = await prisma.brand.findFirst({
+        where: {
+          OR: [
+            { name: { equals: trimmedBrand, mode: "insensitive" } },
+            { slug: brandSlug },
+          ],
+        },
+      });
+
+      if (!matchedBrand) {
+        matchedBrand = await prisma.brand.create({
+          data: {
+            name: trimmedBrand,
+            slug: brandSlug || `brand-${Date.now()}`,
+            isPublished: true,
+          },
+        });
+      }
+      resolvedBrandId = matchedBrand.id;
+    }
+
+    if (!name || !sku || !resolvedBrandId || !categoryId || basePrice === undefined || basePrice === null) {
       return NextResponse.json(
-        { success: false, error: "Product name, SKU, Brand, Category, and Selling Price are required." },
+        { success: false, error: "Product name, SKU, Brand (selected or custom), Category, and Selling Price are required." },
         { status: 400 }
       );
     }
@@ -188,7 +216,7 @@ export async function POST(request: Request) {
         subtitle: subtitle || null,
         slug: finalSlug,
         sku,
-        brandId,
+        brandId: resolvedBrandId,
         categoryId,
         series: series || null,
         modelNumber: modelNumber || null,

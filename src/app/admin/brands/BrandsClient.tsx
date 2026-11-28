@@ -263,9 +263,51 @@ export function BrandsClient({ initialBrands }: { initialBrands: any[] }) {
             </div>
 
             <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto">
+              {/* Quick Preset Selector */}
+              {!editingId && (
+                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded space-y-1.5">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-amber-900 block">
+                    Popular Tech Brands (Click to autofill or type custom below):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { name: "Starlink", site: "https://www.starlink.com" },
+                      { name: "Anker", site: "https://www.anker.com" },
+                      { name: "APC", site: "https://www.se.com/apc" },
+                      { name: "Apple", site: "https://www.apple.com" },
+                      { name: "Asus", site: "https://www.asus.com" },
+                      { name: "Canon", site: "https://www.canon.com" },
+                      { name: "Cisco", site: "https://www.cisco.com" },
+                      { name: "Dell", site: "https://www.dell.com" },
+                      { name: "HP", site: "https://www.hp.com" },
+                      { name: "Lenovo", site: "https://www.lenovo.com" },
+                      { name: "Logitech", site: "https://www.logitech.com" },
+                      { name: "MikroTik", site: "https://mikrotik.com" },
+                      { name: "Samsung", site: "https://www.samsung.com" },
+                      { name: "TP-Link", site: "https://www.tp-link.com" },
+                      { name: "Ubiquiti", site: "https://ui.com" },
+                      { name: "Epson", site: "https://www.epson.com" },
+                    ].map((item) => (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => {
+                          setName(item.name);
+                          setSlug(item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
+                          setWebsiteUrl(item.site);
+                        }}
+                        className="px-2 py-0.5 rounded text-[10px] font-light bg-white border border-amber-200 text-slate-700 hover:bg-amber-100 hover:text-slate-900 transition-colors shadow-2xs"
+                      >
+                        {item.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 mb-1">
-                  Brand Name *
+                  Brand Name * (Type any custom brand name)
                 </label>
                 <input
                   type="text"
@@ -277,8 +319,8 @@ export function BrandsClient({ initialBrands }: { initialBrands: any[] }) {
                       setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
                     }
                   }}
-                  placeholder="e.g. Cisco"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-slate-800 focus:outline-none focus:border-[#FFB200]"
+                  placeholder="e.g. Starlink, MikroTik, Ubiquiti, Cisco..."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-slate-800 focus:outline-none focus:border-[#FFB200] font-medium"
                 />
               </div>
 
