@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,6 +20,13 @@ import {
   Package,
   Globe,
   Video,
+  Upload,
+  UploadCloud,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Eye,
+  X,
 } from "lucide-react";
 
 interface ProductFormClientProps {
@@ -86,20 +93,22 @@ export function ProductFormClient({
   const [asaRoadStock, setAsaRoadStock] = useState(String(asaRoadStockInitial));
 
   // Media & Images
-  const initialImages = initialProduct?.images?.map((img: any) => ({
-    url: img.url,
-    altText: img.altText || "",
-    isPrimary: img.isPrimary,
-  })) || [
-    {
-      url: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&q=80",
-      altText: name || "Product image",
-      isPrimary: true,
-    },
-  ];
+  const initialImages =
+    initialProduct?.images && initialProduct.images.length > 0
+      ? initialProduct.images.map((img: any) => ({
+          url: img.url,
+          altText: img.altText || "",
+          isPrimary: Boolean(img.isPrimary),
+        }))
+      : [];
   const [images, setImages] = useState<{ url: string; altText: string; isPrimary: boolean }[]>(initialImages);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState(initialProduct?.videoUrl || "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [previewImageIndex, setPreviewImageIndex] = useState(0);
 
   // Specifications
   const initialSpecs = initialProduct?.specifications?.map((s: any) => ({
@@ -228,18 +237,124 @@ export function ProductFormClient({
     );
   };
 
+  const handleFileUpload = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setIsUploadingImages(true);
+    setUploadFeedback(null);
+
+    try {
+      const formData = new FormData();
+      const filesArray = Array.from(files);
+      for (const file of filesArray) {
+        formData.append("files", file);
+      }
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to upload images");
+      }
+
+      const newUrls: string[] = data.urls || [];
+      const newEntries = newUrls.map((url, i) => ({
+        url,
+        altText: name ? `${name} - Image ${images.length + i + 1}` : "Product photograph",
+        isPrimary: images.length === 0 && i === 0,
+      }));
+
+      setImages((prev) => {
+        const hasPrimary = prev.some((img) => img.isPrimary);
+        const updated = [...prev, ...newEntries];
+        if (!hasPrimary && updated.length > 0) {
+          updated[0].isPrimary = true;
+        }
+        return updated;
+      });
+
+      setUploadFeedback(`Successfully uploaded ${newUrls.length} image(s)!`);
+      setTimeout(() => setUploadFeedback(null), 4000);
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setUploadFeedback(`Upload error: ${err.message || "Failed to upload images"}`);
+    } finally {
+      setIsUploadingImages(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   const handleAddImage = () => {
-    if (!newImageUrl.trim()) return;
-    setImages([...images, { url: newImageUrl.trim(), altText: name || "Product image", isPrimary: images.length === 0 }]);
+    const trimmed = newImageUrl.trim();
+    if (!trimmed) {
+      // If URL field is empty, clicking "Add Image" triggers the file selector so the admin can pick multiple files directly from their device!
+      fileInputRef.current?.click();
+      return;
+    }
+
+    // Support single or multiple URLs separated by newline or comma
+    const rawUrls = trimmed.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean);
+    if (rawUrls.length === 0) {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    const newEntries = rawUrls.map((url, idx) => ({
+      url,
+      altText: name ? `${name} - Image ${images.length + idx + 1}` : "Product image",
+      isPrimary: images.length === 0 && idx === 0,
+    }));
+
+    setImages((prev) => {
+      const hasPrimary = prev.some((img) => img.isPrimary);
+      const combined = [...prev, ...newEntries];
+      if (!hasPrimary && combined.length > 0) {
+        combined[0].isPrimary = true;
+      }
+      return combined;
+    });
+
     setNewImageUrl("");
+    setUploadFeedback(`Added ${newEntries.length} image URL(s) to gallery.`);
+    setTimeout(() => setUploadFeedback(null), 3000);
   };
 
   const handleSetPrimaryImage = (idx: number) => {
     setImages(images.map((img, i) => ({ ...img, isPrimary: i === idx })));
+    setPreviewImageIndex(idx);
   };
 
   const handleRemoveImage = (idx: number) => {
-    setImages(images.filter((_, i) => i !== idx));
+    const wasPrimary = images[idx]?.isPrimary;
+    const remaining = images.filter((_, i) => i !== idx);
+    if (wasPrimary && remaining.length > 0) {
+      remaining[0].isPrimary = true;
+    }
+    setImages(remaining);
+    if (previewImageIndex >= remaining.length) {
+      setPreviewImageIndex(Math.max(0, remaining.length - 1));
+    }
+  };
+
+  const handleMoveImage = (fromIdx: number, toIdx: number) => {
+    if (toIdx < 0 || toIdx >= images.length) return;
+    const reordered = [...images];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    setImages(reordered);
+    if (previewImageIndex === fromIdx) {
+      setPreviewImageIndex(toIdx);
+    } else if (previewImageIndex === toIdx) {
+      setPreviewImageIndex(fromIdx);
+    }
+  };
+
+  const handleAltTextChange = (idx: number, altText: string) => {
+    setImages(images.map((img, i) => (i === idx ? { ...img, altText } : img)));
   };
 
   const handleUsageToggle = (tag: string) => {
@@ -341,7 +456,7 @@ export function ProductFormClient({
     { id: "basic", label: "1. Basic Info", icon: <Package className="w-3.5 h-3.5" /> },
     { id: "pricing", label: "2. Pricing", icon: <DollarSign className="w-3.5 h-3.5" /> },
     { id: "stock", label: "3. Showrooms & Stock", icon: <Layers className="w-3.5 h-3.5" /> },
-    { id: "media", label: "4. Images & Media", icon: <ImageIcon className="w-3.5 h-3.5" /> },
+    { id: "media", label: `4. Images & Media${images.length > 0 ? ` (${images.length})` : ""}`, icon: <ImageIcon className="w-3.5 h-3.5" /> },
     { id: "specs", label: "5. Tech Specs Builder", icon: <Sliders className="w-3.5 h-3.5" /> },
     { id: "warranty", label: "6. Warranty & Condition", icon: <Shield className="w-3.5 h-3.5" /> },
     { id: "merchandising", label: "7. Merchandising", icon: <Sparkles className="w-3.5 h-3.5" /> },
@@ -876,83 +991,356 @@ export function ProductFormClient({
       {/* Tab 4: Images & Media */}
       {activeTab === "media" && (
         <div className="bg-white p-6 sm:p-8 rounded-b border border-t-0 border-[#EBEBEB] space-y-6">
-          {/* Add image input */}
-          <div className="space-y-2">
+          {/* Hidden multiple file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleFileUpload(e.target.files);
+              }
+            }}
+          />
+
+          {/* Feedback banner */}
+          {uploadFeedback && (
+            <div
+              className={`p-3.5 rounded text-xs flex items-center justify-between transition-all ${
+                uploadFeedback.includes("error") || uploadFeedback.includes("failed")
+                  ? "bg-red-50 text-red-700 border border-red-200"
+                  : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {uploadFeedback.includes("error") || uploadFeedback.includes("failed") ? (
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+                ) : (
+                  <Check className="w-4 h-4 flex-shrink-0 text-emerald-600" />
+                )}
+                <span className="font-light">{uploadFeedback}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUploadFeedback(null)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Upload Dropzone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setIsDragOver(false);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragOver(false);
+              if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFileUpload(e.dataTransfer.files);
+              }
+            }}
+            className={`relative p-6 sm:p-8 rounded-lg border-2 border-dashed transition-all text-center flex flex-col items-center justify-center gap-3 ${
+              isDragOver
+                ? "border-[#FFB200] bg-amber-50/70 ring-2 ring-amber-200"
+                : "border-slate-300 bg-slate-50/70 hover:bg-slate-50 hover:border-slate-400"
+            }`}
+          >
+            {isUploadingImages ? (
+              <div className="flex flex-col items-center gap-2.5 py-4">
+                <Loader2 className="w-8 h-8 text-[#FFB200] animate-spin" />
+                <span className="text-xs font-medium text-slate-800">
+                  Uploading and optimizing product images...
+                </span>
+                <span className="text-[11px] font-light text-slate-500">
+                  Preserving original resolution, aspect ratio, and photo quality.
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shadow-2xs">
+                  <UploadCloud className="w-6 h-6" />
+                </div>
+                <div className="max-w-md">
+                  <p className="text-xs font-medium text-slate-800">
+                    Drag &amp; drop multiple product photos here, or click to browse
+                  </p>
+                  <p className="text-[11px] font-light text-slate-500 mt-1">
+                    Select 1, 2, 5 or more photos at once from your PC or mobile device. JPG, PNG, WebP, and AVIF supported.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-5 py-2.5 bg-[#FFB200] hover:bg-[#FFA500] text-slate-950 rounded text-xs font-medium uppercase tracking-wider flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Browse / Upload Multiple Images
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Web URL input with smart click fallback */}
+          <div className="space-y-2 pt-1">
             <label className="block text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">
-              Add Image URL (Preserves Original Resolution &amp; Aspect Ratio)
+              Or Add Image via Web URL(s)
             </label>
             <div className="flex gap-2">
               <input
-                type="url"
+                type="text"
                 value={newImageUrl}
                 onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/... or /images/products/..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddImage();
+                  }
+                }}
+                placeholder="Paste URL or multiple URLs separated by commas/newlines (leave empty to browse files)"
                 className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 focus:outline-none focus:border-[#FFB200]"
               />
               <button
                 type="button"
                 onClick={handleAddImage}
-                className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs uppercase tracking-wider font-normal transition-colors"
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs uppercase tracking-wider font-normal flex items-center gap-1.5 transition-colors cursor-pointer"
               >
+                <Plus className="w-3.5 h-3.5" />
                 Add Image
               </button>
             </div>
+            <p className="text-[10px] text-slate-400 font-light">
+              Tip: Clicking &quot;Add Image&quot; with an empty input will immediately open your file browser to pick multiple photos from your device.
+            </p>
           </div>
 
-          {/* Image Gallery Grid */}
-          <div className="space-y-2">
-            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 block">
-              Configured Product Gallery ({images.length} images)
-            </span>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`p-2.5 rounded border relative bg-white flex flex-col justify-between group transition-all ${
-                    img.isPrimary ? "border-[#FFB200] ring-2 ring-amber-200" : "border-slate-200"
-                  }`}
-                >
-                  <div className="relative w-full h-32 rounded bg-slate-50 overflow-hidden mb-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img.url}
-                      alt={img.altText || name}
-                      className="w-full h-full object-contain p-2"
-                    />
-                    {img.isPrimary && (
-                      <span className="absolute top-1 left-1 bg-[#FFB200] text-slate-950 text-[9px] font-medium px-2 py-0.5 rounded shadow-2xs">
-                        Primary Cover
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between gap-1 pt-1 border-t border-slate-100">
-                    {!img.isPrimary ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSetPrimaryImage(idx)}
-                        className="text-[10px] text-slate-500 hover:text-amber-600 font-light"
-                      >
-                        Make Primary
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-amber-600 font-normal">Primary</span>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                      title="Remove image"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+          {/* Live Storefront Gallery Preview & Ordering (Matching storefront screenshot) */}
+          {images.length > 0 ? (
+            <div className="space-y-4 pt-4 border-t border-slate-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-slate-800 flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-[#FFB200]" />
+                    Live Storefront Gallery Preview &amp; Ordering
+                  </span>
+                  <p className="text-[11px] text-slate-500 font-light">
+                    This is how your product image appears on the public website. Click any thumbnail to preview or set as Primary Cover.
+                  </p>
                 </div>
-              ))}
+                <span className="text-[11px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded font-mono">
+                  {images.length} {images.length === 1 ? "Image" : "Images"}
+                </span>
+              </div>
+
+              {/* Big Main Image Preview matching storefront layout */}
+              {(() => {
+                const activeImg = images[previewImageIndex] || images.find((i) => i.isPrimary) || images[0];
+                return (
+                  <div className="space-y-3">
+                    <div className="relative w-full h-72 sm:h-96 bg-white rounded border border-slate-200 overflow-hidden flex items-center justify-center p-6 shadow-2xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={activeImg.url}
+                        alt={activeImg.altText || name || "Product preview"}
+                        className="w-full h-full object-contain p-2 transition-all duration-200"
+                      />
+
+                      {/* Storefront Badges matching live site screenshot */}
+                      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 pointer-events-none">
+                        <span
+                          className={`text-[10px] font-light uppercase tracking-wider px-2.5 py-1 rounded shadow-xs ${
+                            condition === "BRAND_NEW"
+                              ? "bg-emerald-600 text-white"
+                              : condition === "OPEN_BOX"
+                              ? "bg-blue-700 text-white"
+                              : "bg-slate-900 text-amber-300"
+                          }`}
+                        >
+                          {condition === "BRAND_NEW"
+                            ? "Brand New (Factory Sealed)"
+                            : condition === "OPEN_BOX"
+                            ? "Open Box (Like New)"
+                            : "Refurbished (Certified Grade A+)"}
+                        </span>
+                        {calculatedDiscount > 0 && (
+                          <span className="bg-red-500 text-white font-light text-[10px] px-2 py-0.5 rounded shadow-xs w-max">
+                            -{calculatedDiscount}% OFF
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Cover Badge / Set Cover Button */}
+                      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                        {activeImg.isPrimary ? (
+                          <span className="bg-[#FFB200] text-slate-950 text-[10px] font-medium px-2.5 py-1 rounded shadow-xs flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-current" /> Primary Storefront Cover
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const targetIdx = images.findIndex((img) => img.url === activeImg.url);
+                              if (targetIdx !== -1) handleSetPrimaryImage(targetIdx);
+                            }}
+                            className="bg-slate-900/85 hover:bg-slate-900 text-white text-[10px] font-medium px-2.5 py-1 rounded shadow-xs transition-colors cursor-pointer"
+                          >
+                            Set as Primary Cover
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Thumbnails Row below the main image (Mirroring storefront thumbnail slider) */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 block">
+                        Thumbnails Row (Yellow border = active view. Click thumbnail to inspect):
+                      </span>
+                      <div className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1">
+                        {images.map((img, idx) => {
+                          const isActive = activeImg.url === img.url;
+                          return (
+                            <div
+                              key={idx}
+                              className="relative flex-shrink-0 flex flex-col items-center gap-1"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setPreviewImageIndex(idx)}
+                                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded border bg-white overflow-hidden p-1 transition-all cursor-pointer ${
+                                  isActive
+                                    ? "border-[#FFB200] ring-2 ring-[#FFB200] shadow-sm"
+                                    : "border-slate-200 hover:border-slate-400"
+                                }`}
+                                title={`View image #${idx + 1}`}
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={img.url}
+                                  alt={img.altText || `Thumbnail ${idx + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                                {img.isPrimary && (
+                                  <span className="absolute bottom-0.5 right-0.5 bg-[#FFB200] text-slate-950 text-[7px] font-bold px-1 py-0.2 rounded">
+                                    COVER
+                                  </span>
+                                )}
+                              </button>
+
+                              {/* Action controls on thumbnail */}
+                              <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded border border-slate-200">
+                                <button
+                                  type="button"
+                                  disabled={idx === 0}
+                                  onClick={() => handleMoveImage(idx, idx - 1)}
+                                  className="p-1 text-slate-600 hover:text-slate-950 disabled:opacity-20 transition-colors"
+                                  title="Move Left"
+                                >
+                                  <ChevronLeft className="w-2.5 h-2.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetPrimaryImage(idx)}
+                                  className={`p-1 transition-colors ${
+                                    img.isPrimary
+                                      ? "text-amber-500"
+                                      : "text-slate-400 hover:text-amber-500"
+                                  }`}
+                                  title={img.isPrimary ? "Primary Cover" : "Make Primary Cover"}
+                                >
+                                  <Star className={`w-2.5 h-2.5 ${img.isPrimary ? "fill-current" : ""}`} />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={idx === images.length - 1}
+                                  onClick={() => handleMoveImage(idx, idx + 1)}
+                                  className="p-1 text-slate-600 hover:text-slate-950 disabled:opacity-20 transition-colors"
+                                  title="Move Right"
+                                >
+                                  <ChevronRight className="w-2.5 h-2.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(idx)}
+                                  className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+                                  title="Remove image"
+                                >
+                                  <Trash2 className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Add More Thumbnail Tile */}
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-16 h-16 sm:w-20 sm:h-20 rounded border-2 border-dashed border-slate-300 hover:border-[#FFB200] hover:bg-amber-50/40 text-slate-400 hover:text-amber-700 flex flex-col items-center justify-center gap-1 text-[9px] font-medium uppercase tracking-wider flex-shrink-0 transition-colors cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4 text-amber-500" />
+                          <span>Add</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* SEO & Image Alt Text Details */}
+                    <div className="bg-slate-50 p-3.5 rounded border border-slate-200 space-y-2 mt-3">
+                      <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-600 block">
+                        Image Alt Descriptions (SEO &amp; Search Engine Indexing)
+                      </span>
+                      <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                        {images.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 bg-white p-1.5 rounded border border-slate-200"
+                          >
+                            <span className="text-[10px] font-mono font-semibold text-slate-500 w-5 text-center">
+                              #{idx + 1}
+                            </span>
+                            <div className="w-7 h-7 rounded bg-slate-50 overflow-hidden flex-shrink-0 border border-slate-200">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={img.url} alt="" className="w-full h-full object-contain" />
+                            </div>
+                            <input
+                              type="text"
+                              value={img.altText}
+                              onChange={(e) => handleAltTextChange(idx, e.target.value)}
+                              placeholder="Describe image for Google search & accessibility..."
+                              className="flex-1 px-2 py-1 bg-white border border-slate-200 rounded text-[11px] text-slate-800 focus:outline-none focus:border-[#FFB200]"
+                            />
+                            {img.isPrimary && (
+                              <span className="text-[8px] bg-amber-100 text-amber-800 font-medium px-1.5 py-0.5 rounded whitespace-nowrap">
+                                Primary Cover
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
-          </div>
+          ) : (
+            <div className="p-8 rounded border border-dashed border-slate-200 text-center space-y-2">
+              <ImageIcon className="w-8 h-8 text-slate-300 mx-auto" />
+              <p className="text-xs font-normal text-slate-700">No images configured yet for this product</p>
+              <p className="text-[11px] text-slate-400 font-light max-w-sm mx-auto">
+                Use the multi-file upload button above to choose photographs from your device, or paste image URLs.
+              </p>
+            </div>
+          )}
 
           {/* Product Video URL */}
           <div className="pt-4 border-t border-slate-100">
