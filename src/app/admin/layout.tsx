@@ -17,6 +17,19 @@ import {
   LogOut,
   Loader2,
   Share2,
+  PlusCircle,
+  Layers,
+  Award,
+  Sparkles,
+  FileText,
+  Menu,
+  ImageIcon,
+  Briefcase,
+  Star,
+  BookOpen,
+  Settings,
+  Users,
+  Boxes,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -86,15 +99,53 @@ export default function AdminLayout({
     );
   }
 
-  const adminNav = [
-    { name: "Dashboard", href: "/admin", icon: <LayoutDashboard className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Inventory & Products", href: "/admin/products", icon: <Package className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Homepage CMS", href: "/admin/cms", icon: <SlidersHorizontal className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Social Media Posts", href: "/admin/posts", icon: <Share2 className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Orders & Sales", href: "/admin/orders", icon: <ShoppingCart className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Logistics & Dispatch", href: "/admin/logistics", icon: <Truck className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Search Demand", href: "/admin/search-demand", icon: <TrendingUp className="w-4 h-4 stroke-[1.4]" /> },
-    { name: "Customer Enquiries", href: "/admin/enquiries", icon: <MessageSquare className="w-4 h-4 stroke-[1.4]" /> },
+  const navSections = [
+    {
+      title: "Core",
+      items: [
+        { name: "Dashboard", href: "/admin", icon: <LayoutDashboard className="w-4 h-4 stroke-[1.4]" /> },
+      ],
+    },
+    {
+      title: "Catalog",
+      items: [
+        { name: "Products", href: "/admin/products", icon: <Package className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Add Product", href: "/admin/products/new", icon: <PlusCircle className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Categories", href: "/admin/categories", icon: <Layers className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Brands", href: "/admin/brands", icon: <Award className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Inventory", href: "/admin/inventory", icon: <Boxes className="w-4 h-4 stroke-[1.4]" /> },
+      ],
+    },
+    {
+      title: "Storefront CMS",
+      items: [
+        { name: "Homepage CMS", href: "/admin/cms", icon: <SlidersHorizontal className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Promotions & Offers", href: "/admin/promotions", icon: <Sparkles className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Website Pages", href: "/admin/pages", icon: <FileText className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Navigation Menus", href: "/admin/menus", icon: <Menu className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Social Feed", href: "/admin/posts", icon: <Share2 className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Media Assets", href: "/admin/media", icon: <ImageIcon className="w-4 h-4 stroke-[1.4]" /> },
+      ],
+    },
+    {
+      title: "Sales & Operations",
+      items: [
+        { name: "Orders & Sales", href: "/admin/orders", icon: <ShoppingCart className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Corporate RFQ", href: "/admin/rfq", icon: <Briefcase className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Customer Enquiries", href: "/admin/enquiries", icon: <MessageSquare className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Product Reviews", href: "/admin/reviews", icon: <Star className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Search Demand", href: "/admin/search-demand", icon: <TrendingUp className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Logistics", href: "/admin/logistics", icon: <Truck className="w-4 h-4 stroke-[1.4]" /> },
+      ],
+    },
+    {
+      title: "Content & Settings",
+      items: [
+        { name: "Hardware Blog", href: "/admin/blog", icon: <BookOpen className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Business Settings", href: "/admin/settings", icon: <Settings className="w-4 h-4 stroke-[1.4]" /> },
+        { name: "Staff & Roles", href: "/admin/staff", icon: <Users className="w-4 h-4 stroke-[1.4]" /> },
+      ],
+    },
   ];
 
   return (
@@ -141,27 +192,34 @@ export default function AdminLayout({
           </button>
         </div>
 
-        {/* Navigation Items (Light Weight, Uppercase Tracking 1:1 with Storefront) */}
-        <nav className="flex-1 px-4 py-2 space-y-1">
-          {adminNav.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded text-xs font-light tracking-[0.14em] uppercase transition-all ${
-                  isActive
-                    ? "bg-amber-50 text-[#FFB200] font-normal border-l-2 border-[#FFB200]"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
-              >
-                <span className={isActive ? "text-[#FFB200]" : "text-slate-400"}>
-                  {item.icon}
-                </span>
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
+        {/* Navigation Items (Organized by Module Groups) */}
+        <nav className="flex-1 px-3 py-3 space-y-5 overflow-y-auto">
+          {navSections.map((sec) => (
+            <div key={sec.title} className="space-y-1">
+              <span className="px-3 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400 block mb-1">
+                {sec.title}
+              </span>
+              {sec.items.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded text-xs font-light tracking-[0.06em] transition-all ${
+                      isActive
+                        ? "bg-amber-50 text-[#FFB200] font-normal border-l-2 border-[#FFB200]"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className={isActive ? "text-[#FFB200]" : "text-slate-400"}>
+                      {item.icon}
+                    </span>
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Footer info */}

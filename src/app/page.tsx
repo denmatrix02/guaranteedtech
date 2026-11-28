@@ -18,15 +18,23 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  // Query DB to verify active products and dynamic Facebook posts & Instagram showroom
-  const [featuredDbProducts, bestSellerDbProducts, latestPostsDbSection, instagramGallerySection] = await Promise.all([
+  // Query DB to verify active products, live promotion, categories, and dynamic CMS sections
+  const [
+    featuredDbProducts,
+    bestSellerDbProducts,
+    latestPostsDbSection,
+    instagramGallerySection,
+    livePromo,
+    dbCategories,
+    dbReviews,
+  ] = await Promise.all([
     prisma.product.findMany({
-      where: { isFeatured: true, availabilityStatus: "IN_STOCK" },
+      where: { isFeatured: true, availabilityStatus: "IN_STOCK", isArchived: false },
       take: 4,
       include: { brand: true, category: true, images: { orderBy: { displayOrder: "asc" } } },
     }),
     prisma.product.findMany({
-      where: { isBestSeller: true, availabilityStatus: "IN_STOCK" },
+      where: { isBestSeller: true, availabilityStatus: "IN_STOCK", isArchived: false },
       take: 5,
       include: { brand: true, category: true, images: { orderBy: { displayOrder: "asc" } } },
     }),
@@ -48,7 +56,47 @@ export default async function HomePage() {
         },
       },
     }),
+    prisma.promotion.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.category.findMany({
+      where: { isPublished: true },
+      orderBy: { displayOrder: "asc" },
+    }),
+    prisma.review.findMany({
+      where: { isApproved: true },
+      take: 4,
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  // Dynamic mapped categories from database
+  const dynamicCategories = dbCategories && dbCategories.length > 0
+    ? dbCategories.map((c: any) => ({
+        name: c.name,
+        slug: c.slug,
+        iconName: c.iconName || "Laptop",
+        badge: c.isPopular ? "Popular" : undefined,
+        image: c.imageUrl || `/images/categories/${c.slug}.svg`,
+        description: c.description || "",
+      }))
+    : undefined;
+
+  // Dynamic active promotion
+  const promoTitle = livePromo?.title || "30% DISCOUNT ON APPLE COLLECTION";
+  const promoImage = livePromo?.bannerUrl || "/images/ui/promo_laptop.jpg";
+  const promoCtaLabel = livePromo?.ctaLabel || "DISCOVER NOW";
+  const promoCtaUrl = livePromo?.ctaUrl || "/products/category/laptops?brand=apple";
+
+  let promoDays = 21, promoHours = 22, promoMins = 19, promoSecs = 30;
+  if (livePromo?.endAt) {
+    const diff = Math.max(0, new Date(livePromo.endAt).getTime() - Date.now());
+    promoDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+    promoHours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    promoMins = Math.floor((diff / (1000 * 60)) % 60);
+    promoSecs = Math.floor((diff / 1000) % 60);
+  }
 
   // 1. Categories exact 1:1 match from reference UI (01 Home.jpg) with verified dedicated routes
   const uiCategories = [
@@ -351,7 +399,7 @@ export default async function HomePage() {
          ========================================================================= */}
       <section className="py-12 bg-white">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
-          <CategoryCarousel />
+          <CategoryCarousel categories={dynamicCategories} />
         </div>
       </section>
 
@@ -411,8 +459,8 @@ export default async function HomePage() {
               <div className="w-full max-w-md">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/images/ui/promo_laptop.jpg"
-                  alt="30% Discount Apple Collection"
+                  src={promoImage}
+                  alt={promoTitle}
                   className="w-full h-auto object-contain hover:scale-105 transition-transform duration-300"
                 />
               </div>
@@ -420,42 +468,40 @@ export default async function HomePage() {
 
             {/* Right Campaign Headline, Countdown, Button */}
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-normal text-slate-800 tracking-tight leading-tight uppercase">
-                30% DISCOUNT ON
-                <br />
-                APPLE COLLECTION
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-normal text-slate-800 tracking-tight leading-tight uppercase whitespace-pre-line">
+                {promoTitle}
               </h2>
 
-              {/* Countdown Timer (21 : 22 : 19 : 30) */}
+              {/* Countdown Timer */}
               <div className="flex items-center justify-center lg:justify-start gap-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">21</span>
+                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoDays}</span>
                   <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Days</span>
                 </div>
                 <span className="text-xl font-extralight text-slate-300 -mt-3">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">22</span>
+                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoHours}</span>
                   <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Hours</span>
                 </div>
                 <span className="text-xl font-extralight text-slate-300 -mt-3">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">19</span>
+                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoMins}</span>
                   <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Mins</span>
                 </div>
                 <span className="text-xl font-extralight text-slate-300 -mt-3">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl sm:text-3xl font-light text-slate-800">30</span>
+                  <span className="text-2xl sm:text-3xl font-light text-slate-800">{promoSecs}</span>
                   <span className="text-[10px] uppercase font-extralight text-slate-400 mt-0.5 tracking-widest">Secs</span>
                 </div>
               </div>
 
               <div>
                 <Link
-                  href="/products/category/laptops?brand=apple"
+                  href={promoCtaUrl}
                   prefetch={true}
                   className="inline-block bg-[#FFB200] hover:bg-[#FFA500] text-white font-light text-xs uppercase tracking-[0.16em] px-8 py-3 rounded-full shadow-xs transition-colors"
                 >
-                  DISCOVER NOW
+                  {promoCtaLabel}
                 </Link>
               </div>
             </div>

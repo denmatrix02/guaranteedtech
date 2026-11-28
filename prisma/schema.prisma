@@ -46,10 +46,12 @@ model Category {
   slug          String      @unique
   description   String?
   imageUrl      String?
+  iconName      String?     @default("Laptop")
   parentId      String?
   parent        Category?   @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   subcategories Category[]  @relation("CategoryHierarchy")
   isPopular     Boolean     @default(false)
+  isPublished   Boolean     @default(true)
   displayOrder  Int         @default(0)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -63,7 +65,10 @@ model Brand {
   slug        String    @unique
   logoUrl     String?
   description String?
+  websiteUrl  String?
   isFeatured  Boolean   @default(false)
+  isPublished Boolean   @default(true)
+  displayOrder Int      @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -73,6 +78,7 @@ model Brand {
 model Product {
   id                 String               @id @default(uuid())
   name               String
+  subtitle           String?
   slug               String               @unique
   sku                String               @unique
   brandId            String
@@ -85,35 +91,62 @@ model Product {
   conditionDetails   String?              // e.g. "Grade A+ Like-New, 100% GTC Certified"
   basePrice          Float                // Current selling price in NGN
   comparePrice       Float?               // Strikethrough/previous price in NGN
+  costPrice          Float?               // Admin-only unit acquisition cost in NGN
   discountPercent    Int?                 @default(0)
   stockQuantity      Int                  @default(0)
+  lowStockThreshold  Int                  @default(3)
   availabilityStatus String               @default("IN_STOCK") // IN_STOCK, LOW_STOCK, OUT_OF_STOCK, PRE_ORDER, SOURCING_AVAILABLE
   warrantyMonths     Int                  @default(6)
+  warrantyProvider   String?              @default("GuaranteedTech")
+  warrantyType       String?              @default("Comprehensive Hardware Replacement & Repair")
   warrantyDetails    String?              @default("GuaranteedTech 6-Month Warranty with free technical support")
+  warrantyTerms      String?
   shortDescription   String?
   fullDescription    String?
   intendedUsage      String?              // comma-separated: "PROGRAMMING,BUSINESS,STUDENT,GRAPHIC_DESIGN"
+  videoUrl           String?
   isFeatured         Boolean              @default(false)
   isBestSeller       Boolean              @default(false)
   isNewArrival       Boolean              @default(false)
   isSpecialOffer     Boolean              @default(false)
+  onSale             Boolean              @default(false)
+  bestReviewed       Boolean              @default(false)
+  enableAddToCart    Boolean              @default(true)
+  enableBuyNow       Boolean              @default(true)
+  enableEnquiries    Boolean              @default(true)
   viewCount          Int                  @default(0)
   salesCount         Int                  @default(0)
   isPublished        Boolean              @default(true)
+  isArchived         Boolean              @default(false)
   seoTitle           String?
   seoDescription     String?
+  focusKeywords      String?
+  canonicalUrl       String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
 
   variants           ProductVariant[]
   images             ProductImage[]
   specifications     ProductSpecification[]
+  branchStock        BranchInventory[]
   reviews            Review[]
   orderItems         OrderItem[]
   wishlistItems      WishlistItem[]
   enquiries          ProductEnquiry[]
   sourceRelations    RelatedProduct[]     @relation("SourceProduct")
   targetRelations    RelatedProduct[]     @relation("TargetProduct")
+}
+
+model BranchInventory {
+  id                String   @id @default(uuid())
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch            String   // "AZIKIWE_ROAD", "ASA_ROAD"
+  quantity          Int      @default(0)
+  lowStockThreshold Int      @default(2)
+  updatedAt         DateTime @updatedAt
+
+  @@unique([productId, branch])
 }
 
 model ProductVariant {
@@ -150,7 +183,7 @@ model ProductSpecification {
   id           String   @id @default(uuid())
   productId    String
   product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  category     String   // e.g. "Processor", "Memory & Storage", "Display", "Connectivity", "Battery"
+  category     String   // e.g. "Processor", "Memory & Storage", "Display", "Connectivity", "Battery", "Custom"
   specKey      String   // e.g. "Processor Speed", "RAM Slots", "Resolution"
   specValue    String   // e.g. "1.9GHz up to 4.8GHz, 4 Cores, 8 Threads"
   displayOrder Int      @default(0)
@@ -167,16 +200,18 @@ model RelatedProduct {
 
 model Review {
   id                 String   @id @default(uuid())
-  productId          String
-  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId          String?
+  product            Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   userId             String?
   user               User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   reviewerName       String
+  reviewerLocation   String?  @default("Lagos, Nigeria")
   rating             Int      // 1 to 5 stars
   title              String?
   comment            String
   isVerifiedPurchase Boolean  @default(false)
   isApproved         Boolean  @default(true)
+  isFeatured         Boolean  @default(false)
   createdAt          DateTime @default(now())
 }
 
@@ -204,9 +239,9 @@ model Order {
   deliveryAddress      String
   deliveryInstructions String?
   channel              String               @default("WEBSITE") // WEBSITE, WHATSAPP, IN_STORE
-  status               String               @default("PENDING") // PENDING, AWAITING_PAYMENT, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED, REFUNDED
+  status               String               @default("PENDING") // PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED, RETURNED
   paymentStatus        String               @default("UNPAID") // UNPAID, PENDING_VERIFICATION, PAID, FAILED, REFUNDED
-  paymentMethod        String               @default("PAYSTACK") // PAYSTACK, FLUTTERWAVE, BANK_TRANSFER, CASH_ON_DELIVERY
+  paymentMethod        String               @default("CASH_ON_DELIVERY") // CASH_ON_DELIVERY, PAYSTACK, BANK_TRANSFER
   subtotal             Float
   deliveryFee          Float                @default(0)
   discountTotal        Float                @default(0)
@@ -274,13 +309,13 @@ model Shipment {
 
 model HomepageSection {
   id           String            @id @default(uuid())
-  sectionKey   String            @unique // e.g. "announcement", "hero_carousel", "featured_categories", "featured_products", "best_sellers", "new_arrivals", "special_offers", "brands", "smart_finder_promo", "accessories", "reviews", "articles", "newsletter"
+  sectionKey   String            @unique // e.g. "announcement", "hero_carousel", "featured_categories", "featured_products", "best_sellers", "new_arrivals", "special_offers", "brands", "smart_finder_promo", "accessories", "reviews", "latest_posts", "instagram_gallery", "footer"
   title        String
   subtitle     String?
   sectionType  String            // HERO_CAROUSEL, CATEGORY_GRID, PRODUCT_GRID, BANNER_PROMO, REVIEWS_CAROUSEL, ARTICLES_GRID, HTML_BLOCK
   displayOrder Int               @default(0)
   isPublished  Boolean           @default(true)
-  configJson   String?           // JSON configuration for styling, product filters, limits
+  configJson   String?           // JSON configuration for styling, product filters, limits, banners
   startAt      DateTime?
   endAt        DateTime?
   createdAt    DateTime          @default(now())
@@ -303,6 +338,121 @@ model HomepageBanner {
   isPublished  Boolean         @default(true)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
+}
+
+model Promotion {
+  id                   String    @id @default(uuid())
+  title                String
+  slug                 String    @unique
+  description          String?
+  discountType         String    @default("PERCENTAGE") // PERCENTAGE, FIXED_AMOUNT
+  discountValue        Float     @default(10)
+  bannerUrl            String?
+  ctaLabel             String?   @default("Shop Offer")
+  ctaUrl               String?   @default("/shop")
+  countdownEnabled     Boolean   @default(false)
+  startAt              DateTime  @default(now())
+  endAt                DateTime
+  isActive             Boolean   @default(true)
+  applicableCategories String?   // JSON array of category slugs
+  applicableProducts   String?   // JSON array of product IDs
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model CmsPage {
+  id                 String   @id @default(uuid())
+  slug               String   @unique // "about", "contact", "warranty", "shipping", "returns", "privacy", "terms", "procurement", "smart-finder", "help"
+  title              String
+  subtitle           String?
+  contentHtml        String?
+  contentBlocksJson  String?  // JSON structured blocks (headings, paragraphs, FAQ accordions, images, stats)
+  seoTitle           String?
+  seoDescription     String?
+  isPublished        Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model BusinessSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique // "general", "branches", "contact", "social", "seo", "shipping", "warranty_defaults", "announcement_bar"
+  valueJson String   // JSON string with full configuration
+  updatedAt DateTime @updatedAt
+}
+
+model CorporateRfq {
+  id                String   @id @default(uuid())
+  rfqNumber         String   @unique // e.g. "RFQ-2026-101"
+  customerName      String
+  companyName       String
+  email             String
+  phone             String
+  requestType       String   @default("BULK_LAPTOPS") // BULK_LAPTOPS, OFFICE_IT_INFRASTRUCTURE, ANNUAL_CONTRACT, CUSTOM_SOURCING
+  requestedItems    String
+  quantity          Int      @default(1)
+  targetBudget      Float?
+  timeline          String?
+  deliveryAddress   String?
+  status            String   @default("NEW") // NEW, REVIEWING, QUOTATION_SENT, NEGOTIATING, APPROVED, COMPLETED, REJECTED
+  assignedStaff     String?
+  internalNotes     String?
+  quotationFileUrl  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model BlogPost {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  excerpt        String?
+  contentHtml    String
+  featuredImage  String?
+  authorName     String    @default("GuaranteedTech Tech Team")
+  category       String    @default("HARDWARE_GUIDE")
+  tags           String?   // comma-separated: "ThinkPad,Laptops,Battery"
+  seoTitle       String?
+  seoDescription String?
+  isPublished    Boolean   @default(true)
+  isFeatured     Boolean   @default(false)
+  publishedAt    DateTime? @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model NavigationMenu {
+  id           String   @id @default(uuid())
+  location     String   @default("HEADER") // "HEADER", "FOOTER_QUICK_LINKS", "FOOTER_CUSTOMER_CARE", "MOBILE"
+  label        String
+  url          String
+  displayOrder Int      @default(0)
+  parentId     String?
+  isPublished  Boolean  @default(true)
+  openInNewTab Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model MediaItem {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  mimeType     String
+  fileSize     Int      // in bytes
+  url          String
+  altText      String?
+  folder       String?  @default("general")
+  usageCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model SearchDemandLog {
@@ -350,4 +500,3 @@ model AuditLog {
   ipAddress String?
   createdAt DateTime @default(now())
 }
-
